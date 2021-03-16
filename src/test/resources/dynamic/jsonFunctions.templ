@@ -1,0 +1,28 @@
+{
+  "$scope": {
+    "testObject": {
+      "test1": "someVal",
+      "test2": "anotherVal"
+    }
+  },
+  "$template": {
+    "math": {
+      "mod": "{{mod(5, 3)}}",
+      "floor": "{{floor(3.6)}}",
+      "ceil": "{{ceil(3.3)}}"
+    },
+    "color": {
+      "hexToArray": "{{hexToArray('#336699')}}"
+    },
+    "string": {
+      "contains": "{{contains('this_is_a_test', '_')}}",
+      "indexOf": "{{indexOf('this_is_a_test', '_is_')}}",
+      "replace": "{{replace('this is a test', ' ', '_')}}",
+      "join": "{{join(['this', 'is', 'a', 'test'], '_')}}",
+      "split": "{{split('this is a test', ' ')}}"
+    },
+    "utility": {
+      "asArray": "{{asArray(testObject, 'key', 'value')}}"
+    }
+  }
+}

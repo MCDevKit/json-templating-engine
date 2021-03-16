@@ -1,0 +1,81 @@
+File conditionals
+{
+  "format_version": "1.15.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "test:test",
+      "runtime_identifier": "minecraft:thrown_trident",
+      "is_summonable": true,
+      "is_spawnable": false
+    },
+    "components": {
+      "minecraft:push_through": {"value": 0},
+      "minecraft:collision_box": {
+        "width": 1,
+        "height": 1
+      },
+      "minecraft:persistent": {},
+      "minecraft:damage_sensor": {"triggers": [{
+        "deals_damage": false,
+        "on_damage": {"filters": {"none_of": [
+          {
+            "test": "has_damage",
+            "value": "none"
+          },
+          {
+            "test": "has_damage",
+            "value": "override"
+          }
+        ]}}
+      }]},
+      "minecraft:knockback_resistance": {
+        "max": 100,
+        "value": 100
+      },
+      "minecraft:health": {
+        "max": 100,
+        "value": 100
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:scale": {"value": 2},
+      "minecraft:type_family": {"family": ["egg"]}
+    },
+    "component_groups": {
+      "egg:blue": {"minecraft:variant": {"value": -1}},
+      "egg:red": {"minecraft:variant": {"value": 6}},
+      "egg:green": {"minecraft:variant": {"value": -1}}
+    },
+    "events": {
+      "egg:blue": {"add": {"component_groups": [
+        "egg:blue",
+        "Zero",
+        "Dynamic ranges -2",
+        "Dynamic ranges -1",
+        "Dynamic ranges 0",
+        "Dynamic ranges 1",
+        "Dynamic ranges 2",
+        "Dynamic ranges 3",
+        "com/stirante/json/JsonProcessorTest.java"
+      ]}},
+      "egg:red": {"add": {"component_groups": [
+        "egg:red",
+        "Number minus one is 4",
+        "Some complex math: 24",
+        "Dynamic ranges 0",
+        "Dynamic ranges 1",
+        "com/stirante/json/JsonProcessorTest.java"
+      ]}},
+      "egg:green": {"add": {"component_groups": [
+        "egg:green",
+        "Dynamic ranges -1",
+        "Dynamic ranges 0",
+        "Dynamic ranges 1",
+        "Dynamic ranges 2",
+        "com/stirante/json/JsonProcessorTest.java"
+      ]}}
+    }
+  }
+}

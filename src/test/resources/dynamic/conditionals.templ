@@ -1,0 +1,125 @@
+{
+  "$scope": {
+    "colors": [
+      {
+        "name": "red",
+        "number": 5
+      },
+      {
+        "name": "green"
+      },
+      {
+        "name": "blue",
+        "number": 0
+      }
+    ]
+  },
+  "$template": {
+    "format_version": "1.15.0",
+    "minecraft:entity": {
+      "description": {
+        "identifier": "test:test",
+        "is_spawnable": false,
+        "is_summonable": true,
+        "runtime_identifier": "minecraft:thrown_trident"
+      },
+      "component_groups": {
+        "{{#colors}}": {
+          "{{?number}}": {
+            "egg:{{name}}": {
+              "minecraft:variant": {
+                "value": "{{=number + 1}}"
+              }
+            }
+          },
+          "{{?!number}}": {
+            "egg:{{name}}": {
+              "minecraft:variant": {
+                "value": -1
+              }
+            }
+          }
+        }
+      },
+      "components": {
+        "minecraft:persistent": {},
+        "minecraft:damage_sensor": {
+          "triggers": [
+            {
+              "deals_damage": false,
+              "on_damage": {
+                "filters": {
+                  "none_of": [
+                    {
+                      "test": "has_damage",
+                      "value": "none"
+                    },
+                    {
+                      "test": "has_damage",
+                      "value": "override"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "minecraft:pushable": {
+          "is_pushable": false,
+          "is_pushable_by_piston": false
+        },
+        "minecraft:push_through": {
+          "value": 0
+        },
+        "minecraft:knockback_resistance": {
+          "value": 100,
+          "max": 100
+        },
+        "minecraft:health": {
+          "value": 100,
+          "max": 100
+        },
+        "minecraft:type_family": {
+          "family": [
+            "egg"
+          ]
+        },
+        "minecraft:collision_box": {
+          "width": 1,
+          "height": 1
+        },
+        "minecraft:scale": {
+          "value": 2
+        }
+      },
+      "events": {
+        "{{#colors}}": {
+          "egg:{{name}}": {
+            "add": {
+              "component_groups": [
+                "egg:{{name}}",
+                {
+                  "$comment": "This should not be in final JSON",
+                  "{{?number}}": "Number minus one is {{number - 1}}"
+                },
+                {
+                  "{{?number}}": "Some complex math: {{(number - 1) * (number + 1)}}"
+                },
+                {
+                  "{{?number == 0}}": "Zero"
+                },
+                {
+                  "{{#(-index)..(index + 1) as num}}": "{{'Dynamic ranges ' + num}}"
+                },
+                {
+                  "{{#fileListRecurse('src/test/java/')}}": "{{value}}"
+                }
+                //Testing for comments
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

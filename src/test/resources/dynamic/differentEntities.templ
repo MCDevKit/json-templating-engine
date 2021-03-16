@@ -1,0 +1,79 @@
+{
+  "$scope": {
+    "colors": [
+      "red", "green", "blue"
+    ],
+    "wholeObject": {
+      "triggers": [
+        {
+          "deals_damage": false,
+          "on_damage": {
+            "filters": {
+              "none_of": [
+                {
+                  "test": "has_damage",
+                  "value": "none"
+                },
+                {
+                  "test": "has_damage",
+                  "value": "override"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "$files": {
+    "array": "colors",
+    "fileName": "gallery_egg_{{value}}"
+  },
+  "$template": {
+    "format_version": "1.15.0",
+    "minecraft:entity": {
+      "description": {
+        "identifier": "egg:gallery_egg_{{value}}",
+        "is_spawnable": false,
+        "is_summonable": true,
+        "runtime_identifier": "minecraft:thrown_trident"
+      },
+      "component_groups": {
+      },
+      "components": {
+        "minecraft:persistent": {},
+        "$comment": "This should not be in final JSON",
+        "minecraft:damage_sensor": "{{wholeObject}}",
+        "minecraft:pushable": {
+          "is_pushable": false,
+          "is_pushable_by_piston": false
+        },
+        "minecraft:push_through": {
+          "value": 0
+        },
+        "minecraft:knockback_resistance": {
+          "value": 100,
+          "max": 100
+        },
+        "minecraft:health": {
+          "value": 100,
+          "max": 100
+        },
+        "minecraft:type_family": {
+          "family": [
+            "egg"
+          ]
+        },
+        "minecraft:collision_box": {
+          "width": 1,
+          "height": 1
+        },
+        "minecraft:scale": {
+          "value": 2
+        }
+      },
+      "events": {
+      }
+    }
+  }
+}

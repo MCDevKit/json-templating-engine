@@ -1,0 +1,36 @@
+File jsonFunctions
+{
+  "utility": {"asArray": [
+    {
+      "value": "anotherVal",
+      "key": "test2"
+    },
+    {
+      "value": "someVal",
+      "key": "test1"
+    }
+  ]},
+  "math": {
+    "floor": "3",
+    "mod": "2.0",
+    "ceil": "3"
+  },
+  "color": {"hexToArray": [
+    0.2,
+    0.4,
+    0.6,
+    1
+  ]},
+  "string": {
+    "replace": "this_is_a_test",
+    "contains": "true",
+    "split": [
+      "this",
+      "is",
+      "a",
+      "test"
+    ],
+    "join": "this_is_a_test",
+    "indexOf": "4"
+  }
+}

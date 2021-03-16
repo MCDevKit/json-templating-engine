@@ -1,0 +1,147 @@
+File gallery_egg_green
+{
+  "format_version": "1.15.0",
+  "minecraft:entity": {
+    "description": {
+      "runtime_identifier": "minecraft:thrown_trident",
+      "identifier": "egg:gallery_egg_green",
+      "is_summonable": true,
+      "is_spawnable": false
+    },
+    "components": {
+      "minecraft:push_through": {"value": 0},
+      "minecraft:collision_box": {
+        "width": 1,
+        "height": 1
+      },
+      "minecraft:persistent": {},
+      "minecraft:damage_sensor": {"triggers": [{
+        "deals_damage": false,
+        "on_damage": {"filters": {"none_of": [
+          {
+            "test": "has_damage",
+            "value": "none"
+          },
+          {
+            "test": "has_damage",
+            "value": "override"
+          }
+        ]}}
+      }]},
+      "minecraft:knockback_resistance": {
+        "max": 100,
+        "value": 100
+      },
+      "minecraft:health": {
+        "max": 100,
+        "value": 100
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:scale": {"value": 2},
+      "minecraft:type_family": {"family": ["egg"]}
+    },
+    "component_groups": {},
+    "events": {}
+  }
+}
+File gallery_egg_blue
+{
+  "format_version": "1.15.0",
+  "minecraft:entity": {
+    "description": {
+      "runtime_identifier": "minecraft:thrown_trident",
+      "identifier": "egg:gallery_egg_blue",
+      "is_summonable": true,
+      "is_spawnable": false
+    },
+    "components": {
+      "minecraft:push_through": {"value": 0},
+      "minecraft:collision_box": {
+        "width": 1,
+        "height": 1
+      },
+      "minecraft:persistent": {},
+      "minecraft:damage_sensor": {"triggers": [{
+        "deals_damage": false,
+        "on_damage": {"filters": {"none_of": [
+          {
+            "test": "has_damage",
+            "value": "none"
+          },
+          {
+            "test": "has_damage",
+            "value": "override"
+          }
+        ]}}
+      }]},
+      "minecraft:knockback_resistance": {
+        "max": 100,
+        "value": 100
+      },
+      "minecraft:health": {
+        "max": 100,
+        "value": 100
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:scale": {"value": 2},
+      "minecraft:type_family": {"family": ["egg"]}
+    },
+    "component_groups": {},
+    "events": {}
+  }
+}
+File gallery_egg_red
+{
+  "format_version": "1.15.0",
+  "minecraft:entity": {
+    "description": {
+      "runtime_identifier": "minecraft:thrown_trident",
+      "identifier": "egg:gallery_egg_red",
+      "is_summonable": true,
+      "is_spawnable": false
+    },
+    "components": {
+      "minecraft:push_through": {"value": 0},
+      "minecraft:collision_box": {
+        "width": 1,
+        "height": 1
+      },
+      "minecraft:persistent": {},
+      "minecraft:damage_sensor": {"triggers": [{
+        "deals_damage": false,
+        "on_damage": {"filters": {"none_of": [
+          {
+            "test": "has_damage",
+            "value": "none"
+          },
+          {
+            "test": "has_damage",
+            "value": "override"
+          }
+        ]}}
+      }]},
+      "minecraft:knockback_resistance": {
+        "max": 100,
+        "value": 100
+      },
+      "minecraft:health": {
+        "max": 100,
+        "value": 100
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:scale": {"value": 2},
+      "minecraft:type_family": {"family": ["egg"]}
+    },
+    "component_groups": {},
+    "events": {}
+  }
+}
