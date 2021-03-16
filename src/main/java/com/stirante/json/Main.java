@@ -54,6 +54,7 @@ public class Main {
                 }
                 else {
                     System.out.println("Enter 'exit' to stop the REPL");
+                    System.out.print("> ");
                     Scanner sc = new Scanner(System.in);
                     while (sc.hasNextLine()) {
                         String line = sc.nextLine();
@@ -66,6 +67,7 @@ public class Main {
                         } catch (JsonTemplatingException ex) {
                             System.err.println(ex.getMessage());
                         }
+                        System.out.print("> ");
                     }
                 }
             }
