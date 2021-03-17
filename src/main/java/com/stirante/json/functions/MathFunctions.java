@@ -1,31 +1,45 @@
 package com.stirante.json.functions;
 
-import com.stirante.json.JsonProcessor;
-
 public class MathFunctions {
 
-    public static void register() {
-        JsonProcessor.defineFunction(new JsonProcessor.FunctionDefinition("floor")
-                .implementation(MathFunctions::floor, Number.class)
-        );
-        JsonProcessor.defineFunction(new JsonProcessor.FunctionDefinition("ceil")
-                .implementation(MathFunctions::ceil, Number.class)
-        );
-        JsonProcessor.defineFunction(new JsonProcessor.FunctionDefinition("mod")
-                .implementation(MathFunctions::mod, Number.class, Number.class)
-        );
+    @JSONFunction
+    private static Integer floor(Number num) {
+        return (int) Math.floor(num.doubleValue());
     }
 
-    private static Object floor(Object[] params) {
-        return (int) Math.floor(((Number) params[0]).doubleValue());
+    @JSONFunction
+    private static Integer ceil(Number num) {
+        return (int) Math.ceil(num.doubleValue());
     }
 
-    private static Object ceil(Object[] params) {
-        return (int) Math.floor(((Number) params[0]).doubleValue());
+    @JSONFunction
+    private static Integer round(Number num) {
+        return (int) Math.round(num.doubleValue());
     }
 
-    private static Object mod(Object[] params) {
-        return ((Number) params[0]).doubleValue() % ((Number) params[1]).doubleValue();
+    @JSONFunction
+    private static Number abs(Number num) {
+        return Math.abs(num.doubleValue());
+    }
+
+    @JSONFunction
+    private static Number clamp(Number num, Number min, Number max) {
+        return Math.max(Math.min(max.doubleValue(), num.doubleValue()), min.doubleValue());
+    }
+
+    @JSONFunction
+    private static Number min(Number a, Number b) {
+        return Math.min(a.doubleValue(), b.doubleValue());
+    }
+
+    @JSONFunction
+    private static Number max(Number a, Number b) {
+        return Math.max(a.doubleValue(), b.doubleValue());
+    }
+
+    @JSONFunction
+    private static Number mod(Number a, Number b) {
+        return a.doubleValue() % b.doubleValue();
     }
 
 }

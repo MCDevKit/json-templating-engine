@@ -11,10 +11,9 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,22 +25,24 @@ public class JsonProcessor {
 
     private static final String[] DANGEROUS_FUNCTIONS = {"fileList", "fileListRecurse", "imageWidth", "imageHeight"};
     public static final Map<String, FunctionDefinition> FUNCTIONS = new HashMap<>();
+    private static final List<Class<?>> ALLOWED_TYPES = Arrays.asList(
+            String.class, Integer.class, Double.class, Float.class, Number.class, Boolean.class, Long.class, JSONArray.class, JSONObject.class);
 
     private static boolean SAFE_MODE = false;
 
     private static final Map<String, JSONObject> MODULES = new HashMap<>();
 
     static {
-        StringFunctions.register();
-        FileFunctions.register();
-        ColorFunctions.register();
-        ImageFunctions.register();
-        MathFunctions.register();
-        UtilityFunctions.register();
+        register(StringFunctions.class);
+        register(FileFunctions.class);
+        register(ColorFunctions.class);
+        register(ImageFunctions.class);
+        register(MathFunctions.class);
+        register(UtilityFunctions.class);
     }
 
-    public static void defineFunction(FunctionDefinition def) {
-        FUNCTIONS.put(def.getName(), def);
+    public static FunctionDefinition defineFunction(String name) {
+        return FUNCTIONS.computeIfAbsent(name, FunctionDefinition::new);
     }
 
     public static void disableFunction(String name) {
@@ -161,7 +162,8 @@ public class JsonProcessor {
                     template = merge(root.get("$extend"), (JSONObject) template, isCopy);
                 }
                 if (isCopy && hasTemplate) {
-                    template = JsonUtils.merge(new JSONObject(root.getJSONObject("$template").toString()), (JSONObject) template);
+                    template = JsonUtils.merge(new JSONObject(root.getJSONObject("$template")
+                            .toString()), (JSONObject) template);
                 }
                 JsonUtils.removeNulls((JSONObject) template);
                 String mFileName = (String) process(fileName, extra, scope, array.get(i), "$files.fileName", deadline);
@@ -206,15 +208,15 @@ public class JsonProcessor {
     }
 
     private static ReferenceResult resolve(String name, JSONObject extraScope, JSONObject fullScope, Object currentScope, String path) {
-        SimpleReferenceLexer lexer = new SimpleReferenceLexer(CharStreams.fromString(name));
-        SimpleReferenceParser parser = new SimpleReferenceParser(new CommonTokenStream(lexer));
+        JsonTemplateLexer lexer = new JsonTemplateLexer(CharStreams.fromString(name));
+        JsonTemplateParser parser = new JsonTemplateParser(new CommonTokenStream(lexer));
         parser.addErrorListener(new BaseErrorListener() {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer, Object o, int i, int i1, String s, RecognitionException e) {
                 throw new JsonTemplatingException("Syntax error in \"" + name + "\"", path);
             }
         });
-        SimpleReferenceParser.ActionContext action = parser.action();
+        JsonTemplateParser.ActionContext action = parser.action();
         return new ActionVisitor(extraScope, fullScope, currentScope, path).visit(action);
     }
 
@@ -392,6 +394,36 @@ public class JsonProcessor {
     private static void checkDeadline(long deadline) {
         if (System.currentTimeMillis() > deadline) {
             throw new RuntimeException("JSON generation time has been limited.");
+        }
+    }
+
+    public static void register(Class<?> cls) {
+        for (Method method : cls.getDeclaredMethods()) {
+            if (method.isAnnotationPresent(JSONFunction.class)) {
+                method.setAccessible(true);
+                String name = method.getName();
+                Class<?>[] types = method.getParameterTypes();
+                Class<?> retType = method.getReturnType();
+                if (!ALLOWED_TYPES.contains(retType)) {
+                    throw new IllegalStateException(
+                            "Registered function " + name + " returns unsupported type " + retType);
+                }
+                for (Class<?> type : types) {
+                    if (!ALLOWED_TYPES.contains(type)) {
+                        throw new IllegalStateException(
+                                "Registered function " + name + " has unsupported parameter type " + retType);
+                    }
+                }
+                defineFunction(name)
+                        .implementation(objects -> {
+                            try {
+                                return method.invoke(null, objects);
+                            } catch (IllegalAccessException | InvocationTargetException e) {
+                                e.printStackTrace();
+                                return null;
+                            }
+                        }, types);
+            }
         }
     }
 

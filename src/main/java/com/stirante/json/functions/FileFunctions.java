@@ -1,7 +1,6 @@
 package com.stirante.json.functions;
 
 import com.stirante.json.exception.JsonTemplatingException;
-import com.stirante.json.JsonProcessor;
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONArray;
 
@@ -14,37 +13,9 @@ import java.util.stream.Collectors;
 
 public class FileFunctions {
 
-    public static void register() {
-        JsonProcessor.defineFunction(
-                new JsonProcessor.FunctionDefinition("fileList")
-                        .implementation(FileFunctions::fileList, String.class)
-                        .implementation(FileFunctions::fileListFilter, String.class, String.class)
-        );
-        JsonProcessor.defineFunction(
-                new JsonProcessor.FunctionDefinition("fileListRecurse")
-                        .implementation(FileFunctions::fileListRecurse, String.class)
-                        .implementation(FileFunctions::fileListRecurseFilter, String.class, String.class)
-        );
-        JsonProcessor.defineFunction(
-                new JsonProcessor.FunctionDefinition("fileExtension")
-                        .implementation(FileFunctions::fileExtension, String.class)
-        );
-        JsonProcessor.defineFunction(
-                new JsonProcessor.FunctionDefinition("fileName")
-                        .implementation(FileFunctions::fileName, String.class)
-        );
-        JsonProcessor.defineFunction(
-                new JsonProcessor.FunctionDefinition("fileBaseName")
-                        .implementation(FileFunctions::fileBaseName, String.class)
-        );
-        JsonProcessor.defineFunction(
-                new JsonProcessor.FunctionDefinition("filePath")
-                        .implementation(FileFunctions::filePath, String.class)
-        );
-    }
-
-    private static Object fileList(Object[] params) {
-        File f = new File(params[0].toString());
+    @JSONFunction
+    private static JSONArray fileList(String path) {
+        File f = new File(path);
         String[] list = f.list();
         if (list == null) {
             return new JSONArray();
@@ -52,23 +23,25 @@ public class FileFunctions {
         return new JSONArray(list);
     }
 
-    private static Object fileListFilter(Object[] params) {
-        File f = new File(params[0].toString());
+    @JSONFunction
+    private static JSONArray fileList(String path, String filter) {
+        File f = new File(path);
         String[] list = f.list();
         if (list == null) {
             return new JSONArray();
         }
         return new JSONArray(Arrays.stream(list)
-                .filter(s -> FilenameUtils.wildcardMatch(s, String.valueOf(params[1])))
+                .filter(s -> FilenameUtils.wildcardMatch(s, filter))
                 .collect(Collectors.toList()));
     }
 
-    private static Object fileListRecurse(Object[] params) {
-        File f = new File(params[0].toString());
+    @JSONFunction
+    private static JSONArray fileListRecurse(String path) {
+        File f = new File(path);
         try {
             return new JSONArray(Files.walk(f.toPath())
-                    .filter(path -> !path.toFile().isDirectory())
-                    .map(path -> f.toPath().relativize(path))
+                    .filter(p -> !p.toFile().isDirectory())
+                    .map(p -> f.toPath().relativize(p))
                     .map(Path::toString)
                     .map(s -> s.replaceAll("\\\\", "/"))
                     .collect(Collectors.toList()));
@@ -77,35 +50,40 @@ public class FileFunctions {
         }
     }
 
-    private static Object fileListRecurseFilter(Object[] params) {
-        File f = new File(params[0].toString());
+    @JSONFunction
+    private static JSONArray fileListRecurse(String path, String filter) {
+        File f = new File(path);
         try {
 
             return new JSONArray(Files.walk(f.toPath())
-                    .filter(path -> !path.toFile().isDirectory())
-                    .map(path -> f.toPath().relativize(path))
+                    .filter(p -> !p.toFile().isDirectory())
+                    .map(p -> f.toPath().relativize(p))
                     .map(Path::toString)
                     .map(s -> s.replaceAll("\\\\", "/"))
-                    .filter(s -> FilenameUtils.wildcardMatch(s, String.valueOf(params[1])))
+                    .filter(s -> FilenameUtils.wildcardMatch(s, filter))
                     .collect(Collectors.toList()));
         } catch (IOException e) {
             throw new JsonTemplatingException("An exception occurred while executing function 'fileListRecurse'", e);
         }
     }
 
-    private static Object fileExtension(Object[] params) {
-        return FilenameUtils.getExtension((String) params[0]);
+    @JSONFunction
+    private static String fileExtension(String path) {
+        return FilenameUtils.getExtension(path);
     }
 
-    private static Object fileName(Object[] params) {
-        return FilenameUtils.getName((String) params[0]);
+    @JSONFunction
+    private static String fileName(String path) {
+        return FilenameUtils.getName(path);
     }
 
-    private static Object fileBaseName(Object[] params) {
-        return FilenameUtils.getBaseName((String) params[0]);
+    @JSONFunction
+    private static String fileBaseName(String path) {
+        return FilenameUtils.getBaseName(path);
     }
 
-    private static Object filePath(Object[] params) {
-        return FilenameUtils.getPath((String) params[0]);
+    @JSONFunction
+    private static String filePath(String path) {
+        return FilenameUtils.getPath(path);
     }
 }

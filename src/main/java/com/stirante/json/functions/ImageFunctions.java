@@ -1,7 +1,6 @@
 package com.stirante.json.functions;
 
 import com.stirante.json.exception.JsonTemplatingException;
-import com.stirante.json.JsonProcessor;
 import com.stirante.json.utils.ImageUtils;
 import com.stirante.json.utils.Pair;
 
@@ -12,19 +11,11 @@ import java.io.IOException;
 
 public class ImageFunctions {
 
-    public static void register() {
-        JsonProcessor.defineFunction(new JsonProcessor.FunctionDefinition("imageWidth")
-                .implementation(ImageFunctions::imageWidth, String.class)
-        );
-        JsonProcessor.defineFunction(new JsonProcessor.FunctionDefinition("imageHeight")
-                .implementation(ImageFunctions::imageHeight, String.class)
-        );
-    }
-
-    private static Object imageWidth(Object[] params) {
-        File f = new File((String) params[0]);
+    @JSONFunction
+    private static Integer imageWidth(String path) {
+        File f = new File(path);
         if (!f.exists()) {
-            throw new JsonTemplatingException(String.format("File '%s' not found!", params[0]));
+            throw new JsonTemplatingException(String.format("File '%s' not found!", path));
         }
         try {
             Pair<Integer, Integer> bounds = ImageUtils.getBounds(f);
@@ -39,10 +30,11 @@ public class ImageFunctions {
         }
     }
 
-    private static Object imageHeight(Object[] params) {
-        File f = new File((String) params[0]);
+    @JSONFunction
+    private static Integer imageHeight(String path) {
+        File f = new File(path);
         if (!f.exists()) {
-            throw new JsonTemplatingException(String.format("File '%s' not found!", params[0]));
+            throw new JsonTemplatingException(String.format("File '%s' not found!", path));
         }
         try {
             Pair<Integer, Integer> bounds = ImageUtils.getBounds(f);
