@@ -3,7 +3,7 @@ package com.stirante.json;
 import com.stirante.json.utils.JsonUtils;
 import org.json.JSONObject;
 
-public class ActionVisitor extends SimpleReferenceBaseVisitor<ReferenceResult> {
+public class ActionVisitor extends JsonTemplateBaseVisitor<ReferenceResult> {
     private final JSONObject extraScope;
     private final JSONObject fullScope;
     private final Object currentScope;
@@ -17,7 +17,7 @@ public class ActionVisitor extends SimpleReferenceBaseVisitor<ReferenceResult> {
     }
 
     @Override
-    public ReferenceResult visitAction(SimpleReferenceParser.ActionContext ctx) {
+    public ReferenceResult visitAction(JsonTemplateParser.ActionContext ctx) {
         JsonProcessor.Action a = JsonProcessor.Action.VALUE;
         if (ctx.Iteration() != null) {
             a = JsonProcessor.Action.ITERATION;

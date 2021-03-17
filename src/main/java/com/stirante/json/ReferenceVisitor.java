@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-class ReferenceVisitor extends SimpleReferenceBaseVisitor<Object> {
+class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     private final JSONObject extraScope;
     private final JSONObject fullScope;
     private final Object currentScope;
@@ -25,16 +25,16 @@ class ReferenceVisitor extends SimpleReferenceBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitArray(SimpleReferenceParser.ArrayContext ctx) {
+    public Object visitArray(JsonTemplateParser.ArrayContext ctx) {
         JSONArray result = new JSONArray();
-        for (SimpleReferenceParser.FieldContext f : ctx.field()) {
+        for (JsonTemplateParser.FieldContext f : ctx.field()) {
             result.put(visit(f));
         }
         return result;
     }
 
     @Override
-    public Object visitReference(SimpleReferenceParser.ReferenceContext ctx) {
+    public Object visitReference(JsonTemplateParser.ReferenceContext ctx) {
         if (ctx.field() != null) {
             return visit(ctx.field());
         }
@@ -146,7 +146,7 @@ class ReferenceVisitor extends SimpleReferenceBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitIndex(SimpleReferenceParser.IndexContext context) {
+    public Object visitIndex(JsonTemplateParser.IndexContext context) {
         if (context.NUMBER() != null) {
             return parseNumber(context.NUMBER().getText());
         }
@@ -160,7 +160,7 @@ class ReferenceVisitor extends SimpleReferenceBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitName(SimpleReferenceParser.NameContext context) {
+    public Object visitName(JsonTemplateParser.NameContext context) {
         String text = context.getText();
         if (text.equals("null")) {
             return null;
@@ -186,7 +186,7 @@ class ReferenceVisitor extends SimpleReferenceBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitField(SimpleReferenceParser.FieldContext context) {
+    public Object visitField(JsonTemplateParser.FieldContext context) {
         if (context.name() != null && context.field() != null) {
             String text = context.name().getText();
             Object object = visit(context.field());
@@ -238,7 +238,7 @@ class ReferenceVisitor extends SimpleReferenceBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitFunction(SimpleReferenceParser.FunctionContext ctx) {
+    public Object visitFunction(JsonTemplateParser.FunctionContext ctx) {
         String methodName = ctx.name().getText();
         if (!JsonProcessor.FUNCTIONS.containsKey(methodName)) {
             throw new JsonTemplatingException("Function '" + methodName + "' not found!", path);

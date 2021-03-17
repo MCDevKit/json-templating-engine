@@ -1,4 +1,4 @@
-grammar SimpleReference;
+grammar JsonTemplate;
 
 Less: '<';
 LessOrEqual: '<=';
