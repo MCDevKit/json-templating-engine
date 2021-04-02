@@ -2,12 +2,12 @@ package com.stirante.json;
 
 public class ReferenceResult {
     private final Object value;
-    private final JsonProcessor.Action action;
+    private final JsonAction jsonAction;
     private final String name;
 
-    ReferenceResult(Object value, JsonProcessor.Action action, String name) {
+    ReferenceResult(Object value, JsonAction jsonAction, String name) {
         this.value = value;
-        this.action = action;
+        this.jsonAction = jsonAction;
         this.name = name;
     }
 
@@ -15,8 +15,8 @@ public class ReferenceResult {
         return value;
     }
 
-    public JsonProcessor.Action getAction() {
-        return action;
+    public JsonAction getAction() {
+        return jsonAction;
     }
 
     public String getName() {

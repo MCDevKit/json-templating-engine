@@ -14,14 +14,14 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     private final JSONObject fullScope;
     private final Object currentScope;
     private final String path;
-    private final JsonProcessor.Action action;
+    private final JsonAction jsonAction;
 
-    public ReferenceVisitor(JSONObject extraScope, JSONObject fullScope, Object currentScope, String path, JsonProcessor.Action action) {
+    public ReferenceVisitor(JSONObject extraScope, JSONObject fullScope, Object currentScope, String path, JsonAction jsonAction) {
         this.extraScope = extraScope;
         this.fullScope = fullScope;
         this.currentScope = currentScope;
         this.path = path;
-        this.action = action;
+        this.jsonAction = jsonAction;
     }
 
     @Override
@@ -195,7 +195,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                 newScope = ((JSONObject) object).get(text);
             }
             if (newScope == null) {
-                if (action == JsonProcessor.Action.PREDICATE) {
+                if (jsonAction == JsonAction.PREDICATE) {
                     return null;
                 }
                 throw new JsonTemplatingException("Failed to resolve \"" + context.getText() + "\" in ", path);

@@ -3,7 +3,6 @@ package com.stirante.json;
 import com.stirante.json.exception.JsonTemplatingException;
 import com.stirante.json.functions.*;
 import com.stirante.json.utils.JsonUtils;
-import com.stirante.json.utils.StringUtils;
 import com.stirante.justpipe.Pipe;
 import org.antlr.v4.runtime.*;
 import org.json.JSONArray;
@@ -14,7 +13,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -348,10 +346,10 @@ public class JsonProcessor {
             while (m.find()) {
                 String toReplace = m.group(0);
                 ReferenceResult resolve = resolve(toReplace, extraScope, fullScope, currentScope, path);
-                if (resolve.getAction() == Action.AS_INT) {
+                if (resolve.getAction() == JsonAction.AS_INT) {
                     isNumber = true;
                 }
-                if (resolve.getAction() == Action.PREDICATE) {
+                if (resolve.getAction() == JsonAction.PREDICATE) {
                     isBoolean = true;
                 }
                 if (resolve.getValue() instanceof JSONObject || resolve.getValue() instanceof JSONArray) {
@@ -381,7 +379,7 @@ public class JsonProcessor {
         while (m.find()) {
             String toReplace = m.group(0);
             ReferenceResult resolve = resolve(toReplace, extraScope, fullScope, currentScope, path);
-            if (resolve.getAction() != Action.VALUE) {
+            if (resolve.getAction() != JsonAction.VALUE) {
                 throw new UnsupportedOperationException("Cannot execute action here!");
             }
             m.appendReplacement(sb, Matcher.quoteReplacement(String.valueOf(resolve
@@ -425,87 +423,6 @@ public class JsonProcessor {
                         }, types);
             }
         }
-    }
-
-    public enum Action {
-        VALUE,
-        ITERATION,
-        AS_INT,
-        PREDICATE
-    }
-
-    public static class FunctionDefinition {
-        private final List<Class<?>[]> types = new ArrayList<>();
-        private final List<Function<Object[], Object>> implementations = new ArrayList<>();
-        private final String name;
-
-        public FunctionDefinition(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public Object execute(Object[] params, String path) {
-            for (int i = 0, typesSize = types.size(); i < typesSize; i++) {
-                Class<?>[] type = types.get(i);
-                if (params.length == type.length) {
-                    paramCheck(params, type, path);
-                    try {
-                        return implementations.get(i).apply(params);
-                    } catch (JsonTemplatingException ex) {
-                        throw ex.withPath(path);
-                    }
-                }
-            }
-            throw new JsonTemplatingException(String.format("Incorrect number of parameters passed to function '%s'!", name), path);
-        }
-
-        private void paramCheck(Object[] params, Class<?>[] types, String path) {
-            for (int i = 0; i < params.length; i++) {
-                Object param = params[i];
-                if (!types[i].isInstance(param)) {
-                    if (param == null) {
-                        if (types[i] == JSONArray.class) {
-                            params[i] = new JSONArray();
-                            return;
-                        }
-                        if (types[i] == Integer.class) {
-                            params[i] = 0;
-                            return;
-                        }
-                        if (types[i] == JSONObject.class) {
-                            params[i] = new JSONObject();
-                            return;
-                        }
-                        if (types[i] == String.class) {
-                            params[i] = "";
-                            return;
-                        }
-                    }
-                    throw new JsonTemplatingException(String.format("Function '%s' expected %s as %s parameter, but got %s", name, types[i]
-                                    .getTypeName(), StringUtils.getFormatterNumber(i + 1),
-                            param == null ? "null" : param.getClass()), path);
-                }
-            }
-        }
-
-        public FunctionDefinition implementation(Function<Object[], Object> implementation, Class<?>... types) {
-            implementations.add(implementation);
-            this.types.add(types);
-            return this;
-        }
-
-        public void disable() {
-            Function<Object[], Object> disabled = objects -> {
-                throw new JsonTemplatingException("This function has been disabled");
-            };
-            for (int i = 0; i < implementations.size(); i++) {
-                implementations.set(i, disabled);
-            }
-        }
-
     }
 
 }

@@ -18,15 +18,15 @@ public class ActionVisitor extends JsonTemplateBaseVisitor<ReferenceResult> {
 
     @Override
     public ReferenceResult visitAction(JsonTemplateParser.ActionContext ctx) {
-        JsonProcessor.Action a = JsonProcessor.Action.VALUE;
+        JsonAction a = JsonAction.VALUE;
         if (ctx.Iteration() != null) {
-            a = JsonProcessor.Action.ITERATION;
+            a = JsonAction.ITERATION;
         }
         else if (ctx.AsInt() != null) {
-            a = JsonProcessor.Action.AS_INT;
+            a = JsonAction.AS_INT;
         }
         else if (ctx.Predicate() != null) {
-            a = JsonProcessor.Action.PREDICATE;
+            a = JsonAction.PREDICATE;
             if (ctx.reference().size() > 1) {
                 Object predicateResult =
                         new ReferenceVisitor(extraScope, fullScope, currentScope, path, a).visit(ctx.reference(0));
