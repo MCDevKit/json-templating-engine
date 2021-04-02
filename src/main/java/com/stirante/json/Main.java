@@ -66,6 +66,7 @@ public class Main {
                             System.out.println(value);
                         } catch (JsonTemplatingException ex) {
                             System.err.println(ex.getMessage());
+                            System.out.println();
                         }
                         System.out.print("> ");
                     }

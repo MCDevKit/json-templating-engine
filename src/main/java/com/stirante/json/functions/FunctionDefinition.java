@@ -1,6 +1,5 @@
 package com.stirante.json.functions;
 
-import com.stirante.json.JsonProcessor;
 import com.stirante.json.exception.JsonTemplatingException;
 import com.stirante.json.utils.StringUtils;
 import org.json.JSONArray;
@@ -67,10 +66,9 @@ public class FunctionDefinition {
         }
     }
 
-    public FunctionDefinition implementation(Function<Object[], Object> implementation, Class<?>... types) {
+    public void addImplementation(Function<Object[], Object> implementation, Class<?>... types) {
         implementations.add(implementation);
         this.types.add(types);
-        return this;
     }
 
     public void disable() {

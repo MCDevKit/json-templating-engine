@@ -208,14 +208,20 @@ public class JsonProcessor {
     private static ReferenceResult resolve(String name, JSONObject extraScope, JSONObject fullScope, Object currentScope, String path) {
         JsonTemplateLexer lexer = new JsonTemplateLexer(CharStreams.fromString(name));
         JsonTemplateParser parser = new JsonTemplateParser(new CommonTokenStream(lexer));
-        parser.addErrorListener(new BaseErrorListener() {
-            @Override
-            public void syntaxError(Recognizer<?, ?> recognizer, Object o, int i, int i1, String s, RecognitionException e) {
-                throw new JsonTemplatingException("Syntax error in \"" + name + "\"", path);
-            }
-        });
+        setErrorHandlers(name, path, lexer);
+        setErrorHandlers(name, path, parser);
         JsonTemplateParser.ActionContext action = parser.action();
         return new ActionVisitor(extraScope, fullScope, currentScope, path).visit(action);
+    }
+
+    private static void setErrorHandlers(String name, String path, Recognizer<?, ?> r) {
+        r.removeErrorListeners();
+        r.addErrorListener(new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer, Object o, int i, int i1, String s, RecognitionException e) {
+                throw new JsonTemplatingException("Syntax error in \"" + name + "\": " + s, path, e);
+            }
+        });
     }
 
     private static Object process(Object element, JSONObject extraScope, JSONObject fullScope, Object currentScope, String path, long deadline) {
@@ -413,7 +419,7 @@ public class JsonProcessor {
                     }
                 }
                 defineFunction(name)
-                        .implementation(objects -> {
+                        .addImplementation(objects -> {
                             try {
                                 return method.invoke(null, objects);
                             } catch (IllegalAccessException | InvocationTargetException e) {

@@ -19,7 +19,7 @@ public class JsonTemplatingException extends RuntimeException {
     }
 
     public static String prepareMessage(String message, String location) {
-        return String.format("%s%s", message, location != null ? String.format(" (%s)", location) : "");
+        return String.format("%s%s", message, location != null && !location.isBlank() ? String.format(" (%s)", location) : "");
     }
 
     public JsonTemplatingException withPath(String path) {
