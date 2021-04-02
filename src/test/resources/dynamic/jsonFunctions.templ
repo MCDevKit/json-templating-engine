@@ -23,6 +23,10 @@
     },
     "utility": {
       "asArray": "{{asArray(testObject, 'key', 'value')}}"
+    },
+    "files": {
+      "fileList": "{{fileList('src/test/resources/dynamic')}}",
+      "fileListFiltered": "{{fileList('src/test/resources/dynamic', '*.templ')}}"
     }
   }
 }

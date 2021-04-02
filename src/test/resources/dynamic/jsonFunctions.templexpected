@@ -10,10 +10,28 @@ File jsonFunctions
       "key": "test1"
     }
   ]},
+  "files": {
+    "fileListFiltered": [
+      "conditionals.templ",
+      "differentEntities.templ",
+      "entityComponentGroups.templ",
+      "jsonFunctions.templ"
+    ],
+    "fileList": [
+      "conditionals.templ",
+      "conditionals.templexpected",
+      "differentEntities.templ",
+      "differentEntities.templexpected",
+      "entityComponentGroups.templ",
+      "entityComponentGroups.templexpected",
+      "jsonFunctions.templ",
+      "jsonFunctions.templexpected"
+    ]
+  },
   "math": {
     "floor": "3",
     "mod": "2.0",
-    "ceil": "3"
+    "ceil": "4"
   },
   "color": {"hexToArray": [
     0.2,
