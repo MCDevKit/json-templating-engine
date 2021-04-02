@@ -44,6 +44,7 @@ action
 reference
    : field
    | function
+   | Subtract reference
    | reference Range reference
    | reference (Divide | Multiply) reference
    | reference (Add | Subtract) reference
@@ -56,7 +57,6 @@ reference
    | reference And reference
    | reference Or reference
    | Not reference
-   | Subtract reference
    | LeftParen reference RightParen
    ;
 
