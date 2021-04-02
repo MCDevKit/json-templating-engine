@@ -42,4 +42,9 @@ public class MathFunctions {
         return a.doubleValue() % b.doubleValue();
     }
 
+    @JSONFunction
+    private static Number pi() {
+        return Math.PI;
+    }
+
 }
