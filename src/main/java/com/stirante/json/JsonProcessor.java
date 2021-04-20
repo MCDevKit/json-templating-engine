@@ -149,9 +149,21 @@ public class JsonProcessor {
                 extra.put("index", i);
                 extra.put("value", array.get(i));
                 if (isCopy) {
-                    template =
-                            new JSONObject(Pipe.from(new File(String.valueOf(processTemplateValues(extra, scope, array.get(i), "$copy", root
-                                    .getString("$copy"))))).toString());
+                    String copyPath = root.getString("$copy");
+                    if (copyPath.endsWith(".templ")) {
+                        Map<String, String> map =
+                                processJson("copy", Pipe.from(new File(String.valueOf(processTemplateValues(extra, scope, array
+                                        .get(i), "$copy", copyPath)))).toString(), globalScope, timeout);
+                        if (map.values().size() != 1) {
+                            throw new JsonTemplatingException("Cannot copy a template, that produces multiple files!");
+                        }
+                        template = new JSONObject(map.get("copy"));
+                    }
+                    else {
+                        template =
+                                new JSONObject(Pipe.from(new File(String.valueOf(processTemplateValues(extra, scope, array
+                                        .get(i), "$copy", copyPath)))).toString());
+                    }
                 }
                 else {
                     template = root.get("$template");
@@ -170,9 +182,21 @@ public class JsonProcessor {
         }
         else {
             if (isCopy) {
-                template =
-                        new JSONObject(Pipe.from(new File(String.valueOf(processTemplateValues(new JSONObject(), scope, new JSONObject(), "$copy", root
-                                .getString("$copy"))))).toString());
+                String copyPath = root.getString("$copy");
+                if (copyPath.endsWith(".templ")) {
+                    Map<String, String> map =
+                            processJson("copy", Pipe.from(new File(String.valueOf(processTemplateValues(new JSONObject(), scope, new JSONObject(), "$copy", copyPath))))
+                                    .toString(), globalScope, timeout);
+                    if (map.values().size() != 1) {
+                        throw new JsonTemplatingException("Cannot copy a template, that produces multiple files!");
+                    }
+                    template = new JSONObject(map.get("copy"));
+                }
+                else {
+                    template =
+                            new JSONObject(Pipe.from(new File(String.valueOf(processTemplateValues(new JSONObject(), scope, new JSONObject(), "$copy", copyPath))))
+                                    .toString());
+                }
             }
             else {
                 template = root.get("$template");

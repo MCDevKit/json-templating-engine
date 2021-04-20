@@ -3,6 +3,7 @@ package com.stirante.json.functions;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class UtilityFunctions {
@@ -15,6 +16,16 @@ public class UtilityFunctions {
             r.put(value, obj.get(s));
             return r;
         }).collect(Collectors.toList()));
+    }
+
+    @JSONFunction
+    private static JSONArray keys(JSONObject obj) {
+        return new JSONArray(new ArrayList<>(obj.keySet()));
+    }
+
+    @JSONFunction
+    private static JSONArray values(JSONObject obj) {
+        return new JSONArray(new ArrayList<>(obj.keySet()));
     }
 
 }
