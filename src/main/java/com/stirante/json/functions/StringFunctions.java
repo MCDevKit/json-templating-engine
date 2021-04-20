@@ -34,4 +34,9 @@ public class StringFunctions {
     private static Integer indexOf(String str, String toFind) {
         return str.indexOf(toFind);
     }
+
+    @JSONFunction
+    private static Integer hash(String str) {
+        return str.hashCode() % Integer.MAX_VALUE;
+    }
 }

@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class UtilityFunctions {
 
@@ -26,6 +27,13 @@ public class UtilityFunctions {
     @JSONFunction
     private static JSONArray values(JSONObject obj) {
         return new JSONArray(new ArrayList<>(obj.keySet()));
+    }
+
+    @JSONFunction
+    private static JSONArray mapValues(JSONArray arr, JSONObject map) {
+        return new JSONArray(StreamSupport.stream(arr.spliterator(), false)
+                .map(o -> map.get(o.toString()))
+                .collect(Collectors.toList()));
     }
 
 }
