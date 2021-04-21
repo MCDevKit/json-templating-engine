@@ -3,6 +3,7 @@ package com.stirante.json.functions;
 import org.json.JSONArray;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -38,5 +39,30 @@ public class StringFunctions {
     @JSONFunction
     private static Integer hash(String str) {
         return str.hashCode() % Integer.MAX_VALUE;
+    }
+
+    @JSONFunction
+    private static String toUpperCase(String str) {
+        return str.toUpperCase(Locale.ROOT);
+    }
+
+    @JSONFunction
+    private static String toLowerCase(String str) {
+        return str.toLowerCase(Locale.ROOT);
+    }
+
+    @JSONFunction
+    private static String substring(String str, Number start, Number end) {
+        return str.substring(start.intValue(), end.intValue());
+    }
+
+    @JSONFunction
+    private static String substring(String str, Number start) {
+        return str.substring(start.intValue());
+    }
+
+    @JSONFunction
+    private static String capitalize(String str) {
+        return str.substring(0, 1).toUpperCase(Locale.ROOT) + str.substring(1).toLowerCase(Locale.ROOT);
     }
 }
