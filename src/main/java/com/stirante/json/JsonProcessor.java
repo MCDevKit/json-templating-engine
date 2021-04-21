@@ -221,15 +221,11 @@ public class JsonProcessor {
         return template instanceof JSONObject ? ((JSONObject) template).toString(2) : ((JSONArray) template).toString(2);
     }
 
-    public static ReferenceResult resolve(String reference, JSONObject scope) {
-        return resolve(reference, new JSONObject(), scope, null);
+    public static ReferenceResult resolve(String reference, JSONObject scope, String path) {
+        return resolve(reference, new JSONObject(), scope, null, path);
     }
 
-    public static ReferenceResult resolve(String reference, JSONObject extraScope, JSONObject scope, Object currentScope) {
-        return resolve(reference, extraScope, scope, currentScope, "");
-    }
-
-    private static ReferenceResult resolve(String name, JSONObject extraScope, JSONObject fullScope, Object currentScope, String path) {
+    public static ReferenceResult resolve(String name, JSONObject extraScope, JSONObject fullScope, Object currentScope, String path) {
         JsonTemplateLexer lexer = new JsonTemplateLexer(CharStreams.fromString(name));
         JsonTemplateParser parser = new JsonTemplateParser(new CommonTokenStream(lexer));
         setErrorHandlers(name, path, lexer);

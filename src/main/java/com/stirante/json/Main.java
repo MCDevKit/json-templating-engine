@@ -49,7 +49,7 @@ public class Main {
             }
             if (action.equalsIgnoreCase("eval")) {
                 if (args.length > i) {
-                    Object value = JsonProcessor.resolve(args[i], scope).getValue();
+                    Object value = JsonProcessor.resolve(args[i], scope, "#/").getValue();
                     System.out.println(value);
                 }
                 else {
@@ -62,7 +62,7 @@ public class Main {
                             return;
                         }
                         try {
-                            Object value = JsonProcessor.resolve(line, scope).getValue();
+                            Object value = JsonProcessor.resolve(line, scope, "#/").getValue();
                             System.out.println(value);
                         } catch (JsonTemplatingException ex) {
                             System.err.println(ex.getMessage());
