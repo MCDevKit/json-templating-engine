@@ -26,7 +26,6 @@ public class ActionVisitor extends JsonTemplateBaseVisitor<ReferenceResult> {
             a = JsonAction.AS_INT;
         }
         else if (ctx.Predicate() != null) {
-            a = JsonAction.PREDICATE;
             if (ctx.reference().size() > 1) {
                 Object predicateResult =
                         new ReferenceVisitor(extraScope, fullScope, currentScope, path, a).visit(ctx.reference(0));
@@ -40,6 +39,8 @@ public class ActionVisitor extends JsonTemplateBaseVisitor<ReferenceResult> {
                             .visit(ctx.reference(2)), a,
                             ctx.As() != null ? ctx.name().getText() : "value");
                 }
+            } else {
+                a = JsonAction.PREDICATE;
             }
         }
         return new ReferenceResult(new ReferenceVisitor(extraScope, fullScope, currentScope, path, a)
