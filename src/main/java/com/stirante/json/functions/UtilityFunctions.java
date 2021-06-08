@@ -37,11 +37,22 @@ public class UtilityFunctions {
                 .map(o -> map.get(o.toString()))
                 .collect(Collectors.toList()));
     }
+
     @JSONFunction
-    private static JSONArray reverse(JSONArray obj) {
-        List<?> l = new ArrayList<>(obj.toList());
+    private static JSONArray reverse(JSONArray arr) {
+        List<?> l = new ArrayList<>(arr.toList());
         Collections.reverse(l);
         return new JSONArray(l);
+    }
+
+    @JSONFunction
+    private static Boolean contains(JSONArray arr, String value) {
+        return arr.toList().stream().anyMatch(o -> o instanceof String && o.equals(value));
+    }
+
+    @JSONFunction
+    private static Boolean contains(JSONArray arr, Number value) {
+        return arr.toList().stream().anyMatch(o -> o instanceof Number && ((Number) o).doubleValue() == value.doubleValue());
     }
 
 }
