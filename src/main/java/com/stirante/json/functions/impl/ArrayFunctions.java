@@ -85,4 +85,17 @@ public class ArrayFunctions {
                 .collect(Collectors.toList()));
     }
 
+    @JSONFunction
+    private static Long count(JSONArray arr, Function<Object, Object> predicate) {
+        return arr.toList()
+                .stream()
+                .filter(o -> JsonUtils.toBoolean(predicate.apply(o)))
+                .count();
+    }
+
+    @JSONFunction
+    private static Integer count(JSONArray arr) {
+        return arr.toList().size();
+    }
+
 }
