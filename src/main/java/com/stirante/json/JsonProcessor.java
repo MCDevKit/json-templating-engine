@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +25,7 @@ public class JsonProcessor {
     private static final String[] DANGEROUS_FUNCTIONS = {"fileList", "fileListRecurse", "imageWidth", "imageHeight"};
     public static final Map<String, FunctionDefinition> FUNCTIONS = new HashMap<>();
     private static final List<Class<?>> ALLOWED_TYPES = Arrays.asList(
-            String.class, Integer.class, Double.class, Float.class, Number.class, Boolean.class, Long.class, JSONArray.class, JSONObject.class);
+            String.class, Integer.class, Double.class, Float.class, Number.class, Boolean.class, Long.class, JSONArray.class, JSONObject.class, Function.class);
 
     private static boolean SAFE_MODE = false;
 
@@ -37,6 +38,7 @@ public class JsonProcessor {
         register(ImageFunctions.class);
         register(MathFunctions.class);
         register(UtilityFunctions.class);
+        register(ArrayFunctions.class);
     }
 
     public static FunctionDefinition defineFunction(String name) {
@@ -54,26 +56,13 @@ public class JsonProcessor {
         SAFE_MODE = true;
     }
 
-    private static Object copyJson(Object obj) {
-        Object copy = obj;
-        if (obj instanceof JSONObject) {
-            JSONObject o = (JSONObject) obj;
-            copy = new JSONObject(o, o.keySet().toArray(new String[]{}));
-        }
-        if (obj instanceof JSONArray) {
-            JSONArray o = (JSONArray) obj;
-            copy = new JSONArray(o.toList());
-        }
-        return copy;
-    }
-
     public static void processModule(String input, JSONObject globalScope, long timeout) {
         long deadline = System.currentTimeMillis() + timeout;
         if (timeout <= 0) {
             deadline = Long.MAX_VALUE;
         }
         JSONObject root = new JSONObject(input);
-        JSONObject scope = (JSONObject) copyJson(globalScope);
+        JSONObject scope = (JSONObject) JsonUtils.copyJson(globalScope);
         if (root.has("$scope")) {
             scope = JsonUtils.merge(root.getJSONObject("$scope"), globalScope);
         }
@@ -84,7 +73,7 @@ public class JsonProcessor {
         if (!root.has("$module")) {
             throw new JsonTemplatingException("Module does not have a name!");
         }
-        Object module = process(copyJson(template), new JSONObject(), scope, scope, "$template", deadline);
+        Object module = process(JsonUtils.copyJson(template), new JSONObject(), scope, scope, "$template", deadline);
         if (module instanceof JSONObject) {
             MODULES.put(root.getString("$module"), (JSONObject) module);
         }
@@ -123,7 +112,7 @@ public class JsonProcessor {
         }
         Map<String, String> result = new HashMap<>();
         JSONObject root = new JSONObject(input);
-        JSONObject scope = (JSONObject) copyJson(globalScope);
+        JSONObject scope = (JSONObject) JsonUtils.copyJson(globalScope);
         if (root.has("$scope")) {
             scope = JsonUtils.merge(root.getJSONObject("$scope"), globalScope);
         }
@@ -177,7 +166,7 @@ public class JsonProcessor {
                 }
                 JsonUtils.removeNulls((JSONObject) template);
                 String mFileName = (String) process(fileName, extra, scope, array.get(i), "$files.fileName", deadline);
-                result.put(mFileName, processFile(copyJson(template), extra, scope, array.get(i), deadline));
+                result.put(mFileName, processFile(JsonUtils.copyJson(template), extra, scope, array.get(i), deadline));
             }
         }
         else {
@@ -211,7 +200,7 @@ public class JsonProcessor {
                 template = JsonUtils.merge(root.getJSONObject("$template"), (JSONObject) template);
             }
             JsonUtils.removeNulls((JSONObject) template);
-            result.put(name, processFile(copyJson(template), new JSONObject(), scope, scope, deadline));
+            result.put(name, processFile(JsonUtils.copyJson(template), new JSONObject(), scope, scope, deadline));
         }
         return result;
     }
@@ -265,7 +254,7 @@ public class JsonProcessor {
                                         checkDeadline(deadline);
                                         JSONObject extra =
                                                 JsonUtils.createIterationExtraScope(extraScope, arr1, i1, e.getName());
-                                        Object copy = copyJson(template);
+                                        Object copy = JsonUtils.copyJson(template);
                                         copy = process(copy, extra, fullScope, arr1.get(i1),
                                                 path + "[" + i + "]", deadline);
                                         nArr.put(copy);
@@ -280,7 +269,7 @@ public class JsonProcessor {
                             case PREDICATE:
                                 if (JsonUtils.toBoolean(e.getValue())) {
                                     Object template = obj.get(s);
-                                    Object copy = copyJson(template);
+                                    Object copy = JsonUtils.copyJson(template);
                                     copy = process(copy, extraScope, fullScope, currentScope,
                                             path + "[" + i + "]" + "/" + s, deadline);
                                     nArr.put(copy);
@@ -315,7 +304,7 @@ public class JsonProcessor {
                         case LITERAL:
                             throw new UnsupportedOperationException("Integer cast is not supported in JSON keys!");
                         case VALUE:
-                            Object el = copyJson(obj.get(s));
+                            Object el = JsonUtils.copyJson(obj.get(s));
                             el = process(el, extraScope, fullScope, currentScope, path + "/" + s, deadline);
                             toRemove.add(s);
                             toAdd.put(String.valueOf(e.getValue()), el);
@@ -329,7 +318,7 @@ public class JsonProcessor {
                                     checkDeadline(deadline);
                                     JSONObject extra =
                                             JsonUtils.createIterationExtraScope(extraScope, arr, i, e.getName());
-                                    JSONObject copy = (JSONObject) copyJson(template);
+                                    JSONObject copy = (JSONObject) JsonUtils.copyJson(template);
                                     copy = (JSONObject) process(copy, extra, fullScope, arr.get(i),
                                             path + "/" + s, deadline);
                                     for (String s1 : copy.keySet()) {
@@ -342,7 +331,7 @@ public class JsonProcessor {
                             toRemove.add(s);
                             if (JsonUtils.toBoolean(e.getValue())) {
                                 JSONObject template = obj.getJSONObject(s);
-                                JSONObject copy = (JSONObject) copyJson(template);
+                                JSONObject copy = (JSONObject) JsonUtils.copyJson(template);
                                 copy = (JSONObject) process(copy, extraScope, fullScope, currentScope,
                                         path + "/" + s, deadline);
                                 for (String s1 : copy.keySet()) {
@@ -357,7 +346,7 @@ public class JsonProcessor {
                 }
                 else {
                     StringBuffer sb = processTemplateValues(extraScope, fullScope, currentScope, path, s);
-                    Object el = copyJson(obj.get(s));
+                    Object el = JsonUtils.copyJson(obj.get(s));
                     el = process(el, extraScope, fullScope, currentScope, path + "/" + s, deadline);
                     if (!s.equals(sb.toString()) || !el.toString().equals(obj.get(s).toString())) {
                         toRemove.add(s);

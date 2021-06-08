@@ -24,6 +24,7 @@ public class FunctionDefinition {
         NAME_MAP.put(Boolean.class, "<Boolean>");
         NAME_MAP.put(String.class, "<String>");
         NAME_MAP.put(Long.class, "<Long>");
+        NAME_MAP.put(Function.class, "<Lambda>");
     }
 
     private final List<Class<?>[]> types = new ArrayList<>();
@@ -108,6 +109,9 @@ public class FunctionDefinition {
             }
             else if (cls == Boolean.class) {
                 return (T) Boolean.FALSE;
+            }
+            else if (cls == Function.class) {
+                return (T) (Function<Object, Object>) o -> o;
             }
             throw new IllegalArgumentException("Unexpected type: " + cls.getName());
         }

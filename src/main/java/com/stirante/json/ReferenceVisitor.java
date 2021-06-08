@@ -7,7 +7,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     private final JSONObject extraScope;
@@ -15,6 +19,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     private final Object currentScope;
     private final String path;
     private final JsonAction jsonAction;
+    private final Deque<JSONObject> scopeStack = new ArrayDeque<>();
 
     public ReferenceVisitor(JSONObject extraScope, JSONObject fullScope, Object currentScope, String path, JsonAction jsonAction) {
         this.extraScope = extraScope;
@@ -22,6 +27,29 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
         this.currentScope = currentScope;
         this.path = path;
         this.jsonAction = jsonAction;
+    }
+
+    private void pushScope(JSONObject scope) {
+        scopeStack.push(scope);
+    }
+
+    private void pushScope(String name, Object value) {
+        pushScope(new JSONObject(Map.of(name, value)));
+    }
+
+    private void popScope() {
+        if (!scopeStack.isEmpty()) {
+            scopeStack.pop();
+        }
+    }
+
+    private Object resolveScope(String name) {
+        for (JSONObject scope : scopeStack) {
+            if (scope.has(name)) {
+                return scope.get(name);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -171,8 +199,8 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
         if (text.equals("value")) {
             return currentScope;
         }
-        Object newScope = null;
-        if (currentScope instanceof JSONObject &&
+        Object newScope = resolveScope(text);
+        if (newScope == null && currentScope instanceof JSONObject &&
                 ((JSONObject) currentScope).has(text)) {
             newScope = ((JSONObject) currentScope).get(text);
         }
@@ -243,8 +271,18 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
         if (!JsonProcessor.FUNCTIONS.containsKey(methodName)) {
             throw new JsonTemplatingException("Function '" + methodName + "' not found!", path);
         }
-        Object[] params = ctx.reference().stream().map(this::visit).toArray();
+        Object[] params = ctx.function_param().stream().map(this::visit).toArray();
         return JsonProcessor.FUNCTIONS.get(methodName).execute(params, path);
+    }
+
+    @Override
+    public Object visitLambda(JsonTemplateParser.LambdaContext ctx) {
+        return (Function<Object, Object>) o -> {
+            pushScope(ctx.name().getText(), o);
+            Object result = visit(ctx.reference());
+            popScope();
+            return result;
+        };
     }
 
     private Object parseNumber(String number) {

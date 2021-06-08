@@ -29,6 +29,7 @@ Literal: '=';
 Range: '..';
 As: 'as';
 Comma: ',';
+Arrow: '=>';
 
 LeftMustache: '{{';
 RightMustache: '}}';
@@ -60,8 +61,17 @@ reference
    | LeftParen reference RightParen
    ;
 
+lambda
+    : name Arrow reference
+    ;
+
 function
-    : name LeftParen (reference (Comma reference)*)? RightParen
+    : name LeftParen (function_param (Comma function_param)*)? RightParen
+    ;
+
+function_param
+    : reference
+    | lambda
     ;
 
 field

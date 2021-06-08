@@ -113,7 +113,7 @@ public class JsonUtils {
         return o != null && (o instanceof JSONObject ||
                 o instanceof JSONArray ||
                 (o instanceof Boolean && (Boolean) o) ||
-                (o instanceof Integer && ((Integer) o) != 0) ||
+                (o instanceof Number && ((Number) o).doubleValue() != 0) ||
                 (o instanceof String && !((String) o).isEmpty()));
     }
 
@@ -129,5 +129,18 @@ public class JsonUtils {
             i++;
         }
         return null;
+    }
+
+    public static Object copyJson(Object obj) {
+        Object copy = obj;
+        if (obj instanceof JSONObject) {
+            JSONObject o = (JSONObject) obj;
+            copy = new JSONObject(o, o.keySet().toArray(new String[]{}));
+        }
+        if (obj instanceof JSONArray) {
+            JSONArray o = (JSONArray) obj;
+            copy = new JSONArray(o.toList());
+        }
+        return copy;
     }
 }
