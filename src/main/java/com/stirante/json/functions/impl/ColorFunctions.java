@@ -1,5 +1,6 @@
-package com.stirante.json.functions;
+package com.stirante.json.functions.impl;
 
+import com.stirante.json.functions.JSONFunction;
 import org.json.JSONArray;
 
 import java.awt.Color;

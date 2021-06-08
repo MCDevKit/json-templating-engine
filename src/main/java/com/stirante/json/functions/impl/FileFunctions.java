@@ -1,6 +1,7 @@
-package com.stirante.json.functions;
+package com.stirante.json.functions.impl;
 
 import com.stirante.json.exception.JsonTemplatingException;
+import com.stirante.json.functions.JSONFunction;
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONArray;
 

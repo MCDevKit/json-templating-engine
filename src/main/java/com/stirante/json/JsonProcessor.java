@@ -2,6 +2,7 @@ package com.stirante.json;
 
 import com.stirante.json.exception.JsonTemplatingException;
 import com.stirante.json.functions.*;
+import com.stirante.json.functions.impl.*;
 import com.stirante.json.utils.JsonUtils;
 import com.stirante.justpipe.Pipe;
 import org.antlr.v4.runtime.*;
