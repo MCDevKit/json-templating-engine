@@ -22,8 +22,8 @@ public class ActionVisitor extends JsonTemplateBaseVisitor<ReferenceResult> {
         if (ctx.Iteration() != null) {
             a = JsonAction.ITERATION;
         }
-        else if (ctx.AsInt() != null) {
-            a = JsonAction.AS_INT;
+        else if (ctx.Literal() != null) {
+            a = JsonAction.LITERAL;
         }
         else if (ctx.Predicate() != null) {
             if (ctx.reference().size() > 1) {

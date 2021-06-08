@@ -24,7 +24,7 @@ RightBracket: ']';
 //Actions
 Iteration: '#';
 Predicate: '?';
-AsInt: '=';
+Literal: '=';
 
 Range: '..';
 As: 'as';
@@ -37,7 +37,7 @@ action
     : LeftMustache? Iteration reference (As name)? RightMustache?
     | LeftMustache? Predicate reference RightMustache?
     | LeftMustache? reference Predicate reference (':' reference)? RightMustache?
-    | LeftMustache? AsInt reference RightMustache?
+    | LeftMustache? Literal reference RightMustache?
     | LeftMustache? reference RightMustache?
     ;
 

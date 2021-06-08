@@ -273,7 +273,7 @@ public class JsonProcessor {
                                 }
                                 continue;
                             case VALUE:
-                            case AS_INT:
+                            case LITERAL:
                                 nArr.put(process(arr.get(i), extraScope, fullScope, currentScope,
                                         path + "[" + i + "]", deadline));
                                 continue;
@@ -289,6 +289,15 @@ public class JsonProcessor {
                         }
                     }
                 }
+                if (arr.get(i) instanceof String && ((String) arr.get(i)).startsWith("{{") && ((String) arr.get(i)).endsWith("}}")) {
+                    ReferenceResult e = resolve((String) arr.get(i), extraScope, fullScope, currentScope, path + "[" + i + "]");
+                    if (e.getAction() == JsonAction.LITERAL && e.getValue() instanceof JSONArray) {
+                        nArr.putAll((JSONArray) e.getValue());
+                    } else {
+                        nArr.put(e.getValue());
+                    }
+                    continue;
+                }
                 nArr.put(process(arr.get(i), extraScope, fullScope, currentScope, path + "[" + i + "]", deadline));
             }
             arr.clear();
@@ -303,7 +312,7 @@ public class JsonProcessor {
                 if (ACTION_PATTERN.matcher(s).matches()) {
                     ReferenceResult e = resolve(s, extraScope, fullScope, currentScope, path);
                     switch (e.getAction()) {
-                        case AS_INT:
+                        case LITERAL:
                             throw new UnsupportedOperationException("Integer cast is not supported in JSON keys!");
                         case VALUE:
                             Object el = copyJson(obj.get(s));
@@ -372,7 +381,7 @@ public class JsonProcessor {
             while (m.find()) {
                 String toReplace = m.group(0);
                 ReferenceResult resolve = resolve(toReplace, extraScope, fullScope, currentScope, path);
-                if (resolve.getAction() == JsonAction.AS_INT) {
+                if (resolve.getAction() == JsonAction.LITERAL) {
                     isNumber = true;
                 }
                 if (resolve.getAction() == JsonAction.PREDICATE) {
