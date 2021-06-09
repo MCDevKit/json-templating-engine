@@ -44,7 +44,6 @@ action
 
 reference
    : field
-   | function
    | Subtract reference
    | reference Range reference
    | reference (Divide | Multiply) reference
@@ -79,6 +78,7 @@ field
    | field ('.' name)
    | name
    | array
+   | function
    | NUMBER
    | ESCAPED_STRING
    ;

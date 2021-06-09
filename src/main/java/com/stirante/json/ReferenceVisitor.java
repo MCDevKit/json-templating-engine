@@ -66,9 +66,6 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
         if (ctx.field() != null) {
             return visit(ctx.field());
         }
-        if (ctx.function() != null) {
-            return visit(ctx.function());
-        }
         if (ctx.reference().size() == 1) {
             Object f1 = visit(ctx.reference(0));
             if (ctx.Not() != null) {
@@ -215,6 +212,9 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
 
     @Override
     public Object visitField(JsonTemplateParser.FieldContext context) {
+        if (context.function() != null) {
+            return visit(context.function());
+        }
         if (context.name() != null && context.field() != null) {
             String text = context.name().getText();
             Object object = visit(context.field());
