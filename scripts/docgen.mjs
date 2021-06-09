@@ -70,7 +70,7 @@ has_children: true
         // Prepare file name
         let name = declaration
             .replace(/\s+/gm, ' ')
-            .replace(/@JSONFunction \w+ \w+ \w+ (\w+)\(.+\)/gm, '$1');
+            .replace(/@JSONFunction \w+ \w+ \w+ (\w+)\(.*\)/gm, '$1');
         path += '/' + name + '.md';
         let sections = {
             overview: '',
@@ -83,7 +83,7 @@ has_children: true
             if (value.startsWith("@param")) {
                 lastSection = 'args';
                 let s = value.replace(/@param \w+ /, '');
-                sections[lastSection] += ' - ' + s.split(' ')[0] + ': ' + s.substr(s.split(' ')[0].length + 1) + '\n';
+                sections[lastSection] += ' - ' + s.split(':')[0].trim() + ': ' + s.substr(s.split(':')[0].length + 1).trim() + '\n';
             }
             else if (value.startsWith("@example")) {
                 lastSection = 'example';
@@ -103,14 +103,17 @@ parent: ` + catName + `
 title: ` + name + (sections.deprecated ? ' (deprecated)' : '') + `
 ---
 
-# ` + name + `
-` + sections.overview + '\n## Arguments\n\n' + sections.args + '\n## Example\n' + sections.example;
+# ` + name + (sections.deprecated ? ' (deprecated)' : '') + `
+` + sections.overview + (sections.args.length > 0 ? '\n## Arguments\n\n' + sections.args : '') + (sections.example.length > 0 ? '\n## Example\n' + sections.example : '');
         write(path, output.substr(0, output.length - 1));
     }
 }
 
 function write(path, content) {
     let p = 'dist/' + path;
+    if (fs.existsSync(p)) {
+        console.warn('File ' + p + ' already exists!')
+    }
     fs.mkdirSync(Path.dirname(p), {recursive: true});
     fs.writeFileSync(p, content);
 }

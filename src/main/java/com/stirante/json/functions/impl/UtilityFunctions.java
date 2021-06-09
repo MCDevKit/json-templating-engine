@@ -14,8 +14,8 @@ public class UtilityFunctions {
 
     /**
      * Returns an array, where each element is replaced with the value from the specified map.
-     * @param arr array Array to be mapped
-     * @param map map Map object
+     * @param arr array: Array to be mapped
+     * @param map map: Map object
      * @deprecated
      * @example
      * Given scope

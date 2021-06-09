@@ -10,8 +10,23 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Image functions are related to reading various information about images.
+ */
 public class ImageFunctions {
 
+    /**
+     * Returns an image width from file path in first argument.
+     * @param path path: A path to the image
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "test": "{{imageWidth('resources/textures/particle/particles.png')}}"
+     *   }
+     * }
+     * </code>
+     */
     @JSONFunction
     private static Integer imageWidth(String path) {
         File f = new File(path);
@@ -31,6 +46,18 @@ public class ImageFunctions {
         }
     }
 
+    /**
+     * Returns an image height from file path in first argument.
+     * @param path path: A path to the image
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "test": "{{imageWidth('resources/textures/particle/particles.png')}}"
+     *   }
+     * }
+     * </code>
+     */
     @JSONFunction
     private static Integer imageHeight(String path) {
         File f = new File(path);

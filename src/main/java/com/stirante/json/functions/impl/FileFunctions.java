@@ -12,6 +12,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+/**
+ * Functions related to files and file paths.
+ */
 public class FileFunctions {
 
     @JSONFunction
@@ -24,6 +27,21 @@ public class FileFunctions {
         return new JSONArray(list);
     }
 
+    /**
+     * Returns an array of file names.
+     * @param path path: A path to the folder
+     * @param filter filter: (optional) A wildcard filter for filtering the file list
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "{{#fileList('resources/textures/particle', '*.png')}}": {
+     *       "{{index}}": "{{value}}"
+     *     }
+     *   }
+     * }
+     * </code>
+     */
     @JSONFunction
     private static JSONArray fileList(String path, String filter) {
         File f = new File(path);
@@ -51,6 +69,21 @@ public class FileFunctions {
         }
     }
 
+    /**
+     * Returns an array of file paths recursively, which means, that if the folder contains another folder, its contents will also be added to the array.
+     * @param path path: A path to the folder
+     * @param filter filter: (optional) A wildcard filter for filtering the file list
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "{{#fileListRecurse('resources/textures', '*.png')}}": {
+     *       "{{index}}": "{{value}}"
+     *     }
+     *   }
+     * }
+     * </code>
+     */
     @JSONFunction
     private static JSONArray fileListRecurse(String path, String filter) {
         File f = new File(path);
@@ -68,21 +101,73 @@ public class FileFunctions {
         }
     }
 
+    /**
+     * Returns an extension from file path in first argument.
+     * @param path path: A path to the file
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 'png'",
+     *     "test": "{{fileExtension('resources/textures/particle/particles.png')}}"
+     *   }
+     * }
+     * </code>
+     */
     @JSONFunction
     private static String fileExtension(String path) {
         return FilenameUtils.getExtension(path);
     }
 
+    /**
+     * Returns a name and extension from file path in first argument.
+     * @param path path: A path to the file
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 'particles.png'",
+     *     "test": "{{fileName('resources/textures/particle/particles.png')}}"
+     *   }
+     * }
+     * </code>
+     */
     @JSONFunction
     private static String fileName(String path) {
         return FilenameUtils.getName(path);
     }
 
+    /**
+     * Returns a name from file path in first argument.
+     * @param path path: A path to the file
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 'particles'",
+     *     "test": "{{fileBaseName('resources/textures/particle/particles.png')}}"
+     *   }
+     * }
+     * </code>
+     */
     @JSONFunction
     private static String fileBaseName(String path) {
         return FilenameUtils.getBaseName(path);
     }
 
+    /**
+     * Returns a directory path from file path in first argument.
+     * @param path path: A path to the file
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 'resources/textures/particle/'",
+     *     "test": "{{filePath('resources/textures/particle/particles.png')}}"
+     *   }
+     * }
+     * </code>
+     */
     @JSONFunction
     private static String filePath(String path) {
         return FilenameUtils.getPath(path);
