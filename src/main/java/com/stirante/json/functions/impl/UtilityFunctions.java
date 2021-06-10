@@ -52,4 +52,33 @@ public class UtilityFunctions {
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Returns whether the object has specified field.
+     * @param obj object: Object to check
+     * @param key field name: Field name
+     * @example
+     * Scope
+     * <code>
+     * {
+     *   "map": {
+     *     "1": "someVal",
+     *     "2": "anotherVal"
+     *   }
+     * }
+     * </code>
+     *
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be false",
+     *     "test": "{{exists(map, '3')}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Boolean exists(JSONObject obj, String key) {
+        return obj.has(key);
+    }
+
 }
