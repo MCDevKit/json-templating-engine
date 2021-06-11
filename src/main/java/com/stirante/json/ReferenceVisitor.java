@@ -188,9 +188,6 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     @Override
     public Object visitName(JsonTemplateParser.NameContext context) {
         String text = context.getText();
-        if (text.equals("null")) {
-            return null;
-        }
         if (text.equals("this")) {
             return currentScope;
         }
@@ -213,6 +210,15 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
 
     @Override
     public Object visitField(JsonTemplateParser.FieldContext context) {
+        if (context.Null() != null) {
+            return null;
+        }
+        if (context.True() != null) {
+            return true;
+        }
+        if (context.False() != null) {
+            return false;
+        }
         if (context.function() != null) {
             return visit(context.function());
         }

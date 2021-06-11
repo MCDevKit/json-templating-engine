@@ -34,6 +34,10 @@ Arrow: '=>';
 LeftMustache: '{{';
 RightMustache: '}}';
 
+Null: 'null';
+False: 'false';
+True: 'true';
+
 action
     : LeftMustache? Iteration reference (As name)? RightMustache?
     | LeftMustache? Predicate reference RightMustache?
@@ -74,7 +78,10 @@ function_param
     ;
 
 field
-   : field (LeftBracket index RightBracket)
+   : True
+   | False
+   | Null
+   | field (LeftBracket index RightBracket)
    | field ('.' name)
    | name
    | array
