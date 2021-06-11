@@ -77,6 +77,13 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             return f1;
         }
         else if (ctx.reference().size() == 2) {
+            // Move AND and OR here to make those operators short-circuiting
+            if (ctx.And() != null) {
+                return JsonUtils.toBoolean(visit(ctx.reference(0))) && JsonUtils.toBoolean(visit(ctx.reference(1)));
+            }
+            else if (ctx.Or() != null) {
+                return JsonUtils.toBoolean(visit(ctx.reference(0))) || JsonUtils.toBoolean(visit(ctx.reference(1)));
+            }
             Object f1 = visit(ctx.reference(0));
             Object f2 = visit(ctx.reference(1));
             if (ctx.Add() != null) {
@@ -100,12 +107,6 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             }
             else if (ctx.NotEqual() != null) {
                 return !Objects.equals(f1, f2);
-            }
-            else if (ctx.And() != null) {
-                return JsonUtils.toBoolean(f1) && JsonUtils.toBoolean(f2);
-            }
-            else if (ctx.Or() != null) {
-                return JsonUtils.toBoolean(f1) || JsonUtils.toBoolean(f2);
             }
             else if (ctx.Range() != null) {
                 JSONArray arr = new JSONArray();
@@ -241,7 +242,9 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                 if (!(i instanceof Number)) {
                     throw new JsonTemplatingException("Array index is not a number!", path);
                 }
-                return arr.get(((Number) i).intValue());
+                int index = ((Number) i).intValue();
+                if (index >= arr.length() || index < 0) throw new JsonTemplatingException("Array index out of bounds!");
+                return arr.toList().get(index);
             }
             else if (object instanceof JSONObject) {
                 JSONObject obj = (JSONObject) object;
