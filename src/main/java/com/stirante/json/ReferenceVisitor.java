@@ -7,11 +7,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     private final JSONObject extraScope;
@@ -229,6 +227,12 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             if (object instanceof JSONObject && ((JSONObject) object).has(text)) {
                 newScope = ((JSONObject) object).get(text);
             }
+            // After adding lambdas, we also need to check for maps
+            //noinspection unchecked
+            if (object instanceof Map && ((Map<String, ?>) object).containsKey(text)) {
+                //noinspection unchecked
+                newScope = ((Map<String, ?>) object).get(text);
+            }
             if (newScope == null) {
                 if (jsonAction == JsonAction.PREDICATE) {
                     return null;
@@ -258,6 +262,17 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                     return JsonUtils.getByIndex(obj, ((Number) i).intValue());
                 }
                 if (i instanceof String && obj.has((String) i)) {
+                    return obj.get((String) i);
+                }
+            }
+            // After adding lambdas, we also need to check for maps
+            else if (object instanceof Map) {
+                //noinspection unchecked
+                Map<String, ?> obj = (Map<String, ?>) object;
+                if (i instanceof Number) {
+                    return obj.get(new ArrayList<>(obj.keySet()).get(((Number) i).intValue()));
+                }
+                if (i instanceof String && obj.containsKey((String) i)) {
                     return obj.get((String) i);
                 }
             }
