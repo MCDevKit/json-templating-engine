@@ -249,7 +249,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                     throw new JsonTemplatingException("Array index is not a number!", path);
                 }
                 int index = ((Number) i).intValue();
-                if (index >= arr.length() || index < 0) throw new JsonTemplatingException("Array index out of bounds!");
+                if (index >= arr.length() || index < 0) throw new JsonTemplatingException("Array index out of bounds!", path);
                 return arr.toList().get(index);
             }
             else if (object instanceof JSONObject) {
