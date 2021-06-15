@@ -1,7 +1,8 @@
 package com.stirante.json;
 
 import com.stirante.json.exception.JsonTemplatingException;
-import com.stirante.json.functions.*;
+import com.stirante.json.functions.FunctionDefinition;
+import com.stirante.json.functions.JSONFunction;
 import com.stirante.json.functions.impl.*;
 import com.stirante.json.utils.JsonUtils;
 import com.stirante.justpipe.Pipe;
@@ -279,11 +280,14 @@ public class JsonProcessor {
                         }
                     }
                 }
-                if (arr.get(i) instanceof String && ((String) arr.get(i)).startsWith("{{") && ((String) arr.get(i)).endsWith("}}")) {
-                    ReferenceResult e = resolve((String) arr.get(i), extraScope, fullScope, currentScope, path + "[" + i + "]");
+                if (arr.get(i) instanceof String && ((String) arr.get(i)).startsWith("{{") &&
+                        ((String) arr.get(i)).endsWith("}}")) {
+                    ReferenceResult e =
+                            resolve((String) arr.get(i), extraScope, fullScope, currentScope, path + "[" + i + "]");
                     if (e.getAction() == JsonAction.LITERAL && e.getValue() instanceof JSONArray) {
                         nArr.putAll((JSONArray) e.getValue());
-                    } else {
+                    }
+                    else {
                         nArr.put(e.getValue());
                     }
                     continue;

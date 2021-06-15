@@ -129,7 +129,7 @@ public class ArrayFunctions {
      */
     @JSONFunction
     private static JSONArray values(JSONObject obj) {
-        return new JSONArray(new ArrayList<>(obj.keySet()));
+        return new JSONArray(new ArrayList<>(obj.toMap().values()));
     }
 
     /**

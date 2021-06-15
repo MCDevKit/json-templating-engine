@@ -50,5 +50,15 @@ File jsonFunctions
     ],
     "join": "this_is_a_test",
     "indexOf": "4"
+  },
+  "array": {
+    "keys": [
+      "test2",
+      "test1"
+    ],
+    "values": [
+      "anotherVal",
+      "someVal"
+    ]
   }
 }
