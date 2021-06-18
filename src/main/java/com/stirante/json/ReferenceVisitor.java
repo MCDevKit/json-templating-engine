@@ -233,6 +233,19 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                 //noinspection unchecked
                 newScope = ((Map<String, ?>) object).get(text);
             }
+
+            if (object instanceof JSONArray) {
+                throw new JsonTemplatingException("Trying to access field from an array", path);
+            }
+
+            if (object instanceof String) {
+                throw new JsonTemplatingException("Trying to access field from a string", path);
+            }
+
+            if (object instanceof Number) {
+                throw new JsonTemplatingException("Trying to access field from a number", path);
+            }
+
             if (newScope == null) {
                 if (jsonAction == JsonAction.PREDICATE) {
                     return null;
