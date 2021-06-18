@@ -228,13 +228,11 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                 newScope = ((JSONObject) object).get(text);
             }
             // After adding lambdas, we also need to check for maps
-            //noinspection unchecked
-            if (object instanceof Map && ((Map<String, ?>) object).containsKey(text)) {
-                //noinspection unchecked
-                newScope = ((Map<String, ?>) object).get(text);
+            if (object instanceof Map && ((Map<?, ?>) object).containsKey(text)) {
+                newScope = ((Map<?, ?>) object).get(text);
             }
 
-            if (object instanceof JSONArray) {
+            if (object instanceof JSONArray || object instanceof List) {
                 throw new JsonTemplatingException("Trying to access field from an array", path);
             }
 
@@ -268,6 +266,16 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                 int index = ((Number) i).intValue();
                 if (index >= arr.length() || index < 0) throw new JsonTemplatingException("Array index out of bounds!", path);
                 return arr.toList().get(index);
+            }
+            // After adding lambdas, we also need to check for lists
+            if (object instanceof List) {
+                List<?> arr = (List<?>) object;
+                if (!(i instanceof Number)) {
+                    throw new JsonTemplatingException("Array index is not a number!", path);
+                }
+                int index = ((Number) i).intValue();
+                if (index >= arr.size() || index < 0) throw new JsonTemplatingException("Array index out of bounds!", path);
+                return arr.get(index);
             }
             else if (object instanceof JSONObject) {
                 JSONObject obj = (JSONObject) object;
@@ -350,6 +358,14 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             JSONArray arr = (JSONArray) o;
             for (int i = 0; i < arr.length(); i++) {
                 arr.put(i, negate(arr.get(i)));
+            }
+            return arr;
+        }
+        else if (o instanceof List) {
+            //noinspection unchecked
+            List<Object> arr = (List<Object>) o;
+            for (int i = 0; i < arr.size(); i++) {
+                arr.add(i, negate(arr.get(i)));
             }
             return arr;
         }
