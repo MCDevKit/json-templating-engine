@@ -26,7 +26,8 @@
     },
     "array": {
       "keys": "{{keys(testObject)}}",
-      "values": "{{values(testObject)}}"
+      "values": "{{values(testObject)}}",
+      "first": "{{findFirst(0..6, x => mod(x, 2) == 0)}}"
     },
     "files": {
       "fileList": "{{fileList('src/test/resources/dynamic')}}",

@@ -27,7 +27,7 @@ public class JsonProcessor {
     private static final String[] DANGEROUS_FUNCTIONS = {"fileList", "fileListRecurse", "imageWidth", "imageHeight"};
     public static final Map<String, FunctionDefinition> FUNCTIONS = new HashMap<>();
     private static final List<Class<?>> ALLOWED_TYPES = Arrays.asList(
-            String.class, Integer.class, Double.class, Float.class, Number.class, Boolean.class, Long.class, JSONArray.class, JSONObject.class, Function.class);
+            String.class, Integer.class, Double.class, Float.class, Number.class, Boolean.class, Long.class, JSONArray.class, JSONObject.class, Function.class, Object.class);
 
     private static boolean SAFE_MODE = false;
 

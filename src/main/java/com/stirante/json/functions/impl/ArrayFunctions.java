@@ -1,5 +1,6 @@
 package com.stirante.json.functions.impl;
 
+import com.stirante.json.exception.JsonTemplatingException;
 import com.stirante.json.functions.JSONFunction;
 import com.stirante.json.utils.JsonUtils;
 import org.json.JSONArray;
@@ -276,6 +277,29 @@ public class ArrayFunctions {
     @JSONFunction
     private static Integer count(JSONArray arr) {
         return arr.toList().size();
+    }
+
+    /**
+     * Returns the first element from an array filtered by the predicate.
+     * @param arr array: Source array
+     * @param predicate predicate: Lambda, that should return whether an element should remain
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 0",
+     *     "test": "{{findFirst(0..4, x => mod(x, 2) == 0)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Object findFirst(JSONArray arr, Function<Object, Object> predicate) {
+        return arr.toList()
+                .stream()
+                .filter(o -> JsonUtils.toBoolean(predicate.apply(o)))
+                .findFirst()
+                .orElseThrow(() -> new JsonTemplatingException("No matching items found!"));
     }
 
 }
