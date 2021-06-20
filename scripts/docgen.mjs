@@ -53,7 +53,7 @@ function createDoc(fileName, declaration, doc) {
         // Remove pre tags
         .replace(/<\s*?pre\s*?>(.*?)<\s*?\/\s*?pre\s*?>/gs, "`$1`")
         // Fix mustache for jekyll
-        .replace('{{', '{{"{{').replace('}}', '}}"}}');
+        .replace('{{', '{{"{{').replace('}}', '"}}}}');
     if (declaration.startsWith('public class ')) {
         path += '/' + 'index.md';
         let output = `---
