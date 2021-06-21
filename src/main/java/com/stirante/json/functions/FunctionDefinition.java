@@ -82,6 +82,13 @@ public class FunctionDefinition {
 
     @SuppressWarnings("unchecked")
     private <T> T getEmptyIfNull(Class<T> cls, Object param) {
+        // Convert Lists to JSONArrays and Maps to JSONObjects
+        if (cls == JSONArray.class && param instanceof List) {
+            return (T) new JSONArray((List<?>)param);
+        }
+        if (cls == JSONObject.class && param instanceof Map) {
+            return (T) new JSONObject((Map<?, ?>) param);
+        }
         if (!cls.isInstance(param)) {
             if (cls == JSONArray.class) {
                 return (T) new JSONArray();
@@ -123,6 +130,8 @@ public class FunctionDefinition {
     private boolean paramCheck(Object[] params, Class<?>[] types) {
         for (int i = 0; i < params.length; i++) {
             Object param = params[i];
+            if (types[i] == JSONArray.class && param instanceof List) return true;
+            if (types[i] == JSONObject.class && param instanceof Map) return true;
             if (!types[i].isInstance(param) && param != null) {
                 return false;
             }
