@@ -228,20 +228,21 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                 newScope = ((JSONObject) object).get(text);
             }
             // After adding lambdas, we also need to check for maps
-            if (object instanceof Map && ((Map<?, ?>) object).containsKey(text)) {
+            else if (object instanceof Map && ((Map<?, ?>) object).containsKey(text)) {
                 newScope = ((Map<?, ?>) object).get(text);
             }
+            else {
+                if (object instanceof JSONArray || object instanceof List) {
+                    throw new JsonTemplatingException("Trying to access field from an array", path);
+                }
 
-            if (object instanceof JSONArray || object instanceof List) {
-                throw new JsonTemplatingException("Trying to access field from an array", path);
-            }
+                if (object instanceof String) {
+                    throw new JsonTemplatingException("Trying to access field from a string", path);
+                }
 
-            if (object instanceof String) {
-                throw new JsonTemplatingException("Trying to access field from a string", path);
-            }
-
-            if (object instanceof Number) {
-                throw new JsonTemplatingException("Trying to access field from a number", path);
+                if (object instanceof Number) {
+                    throw new JsonTemplatingException("Trying to access field from a number", path);
+                }
             }
 
             if (newScope == null) {
