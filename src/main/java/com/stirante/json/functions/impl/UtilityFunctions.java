@@ -81,4 +81,34 @@ public class UtilityFunctions {
         return obj.has(key);
     }
 
+    /**
+     * Returns the specified field value or default if doesn't exist or null.
+     * @param obj object: Object to check
+     * @param key field name: Field name
+     * @param def default value: Value returned if the field doesn't exist or null
+     * @example
+     * Scope
+     * <code>
+     * {
+     *   "map": {
+     *     "1": "someVal",
+     *     "2": "anotherVal"
+     *   }
+     * }
+     * </code>
+     *
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 'defaultVal'",
+     *     "test": "{{def(map, '3', 'defaultVal')}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Object def(JSONObject obj, String key, Object def) {
+        return obj.has(key) && obj.get(key) != null ? obj.get(key) : def;
+    }
+
 }
