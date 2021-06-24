@@ -9,8 +9,6 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     private final JSONObject extraScope;
@@ -218,8 +216,24 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
         if (context.False() != null) {
             return false;
         }
-        if (context.function() != null) {
-            return visit(context.function());
+        if (context.LeftParen() != null && context.field() != null) {
+            Object lambda = visit(context.field());
+            Object[] params = context.function_param().stream().map(this::visit).toArray();
+            if (lambda instanceof String) {
+                JsonTemplateParser.LambdaContext lambdaContext = JsonProcessor.resolveLambdaTree((String) lambda, path);
+                Object func = visit(lambdaContext);
+                if (func instanceof JSONLambda) {
+                    return ((JSONLambda) func).apply(params);
+                } else {
+                    throw new JsonTemplatingException("Function '" + context.field().getText() + "' not found!", path);
+                }
+            } else {
+                String methodName = context.field().name().getText();
+                if (!JsonProcessor.FUNCTIONS.containsKey(methodName)) {
+                    throw new JsonTemplatingException("Function '" + methodName + "' not found!", path);
+                }
+                return JsonProcessor.FUNCTIONS.get(methodName).execute(params, path);
+            }
         }
         if (context.name() != null && context.field() != null) {
             String text = context.name().getText();
@@ -312,15 +326,15 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
         return null;
     }
 
-    @Override
-    public Object visitFunction(JsonTemplateParser.FunctionContext ctx) {
-        String methodName = ctx.name().getText();
-        if (!JsonProcessor.FUNCTIONS.containsKey(methodName)) {
-            throw new JsonTemplatingException("Function '" + methodName + "' not found!", path);
-        }
-        Object[] params = ctx.function_param().stream().map(this::visit).toArray();
-        return JsonProcessor.FUNCTIONS.get(methodName).execute(params, path);
-    }
+//    @Override
+//    public Object visitFunction(JsonTemplateParser.FunctionContext ctx) {
+//        String methodName = ctx.name().getText();
+//        if (!JsonProcessor.FUNCTIONS.containsKey(methodName)) {
+//            throw new JsonTemplatingException("Function '" + methodName + "' not found!", path);
+//        }
+//        Object[] params = ctx.function_param().stream().map(this::visit).toArray();
+//        return JsonProcessor.FUNCTIONS.get(methodName).execute(params, path);
+//    }
 
     @Override
     public Object visitLambda(JsonTemplateParser.LambdaContext ctx) {

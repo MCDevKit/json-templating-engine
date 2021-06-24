@@ -69,9 +69,9 @@ lambda
     | LeftParen name (Comma name)* RightParen Arrow reference
     ;
 
-function
-    : name LeftParen (function_param (Comma function_param)*)? RightParen
-    ;
+//function
+//    : name LeftParen (function_param (Comma function_param)*)? RightParen
+//    ;
 
 function_param
     : reference
@@ -83,10 +83,10 @@ field
    | False
    | Null
    | field (LeftBracket index RightBracket)
+   | field LeftParen (function_param (Comma function_param)*)? RightParen
    | field ('.' name)
    | name
    | array
-   | function
    | NUMBER
    | ESCAPED_STRING
    ;

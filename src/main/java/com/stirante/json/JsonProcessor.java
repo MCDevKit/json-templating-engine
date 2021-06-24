@@ -212,6 +212,14 @@ public class JsonProcessor {
         return template instanceof JSONObject ? ((JSONObject) template).toString(2) : ((JSONArray) template).toString(2);
     }
 
+    public static JsonTemplateParser.LambdaContext resolveLambdaTree(String src, String path) {
+        JsonTemplateLexer lexer = new JsonTemplateLexer(CharStreams.fromString(src));
+        JsonTemplateParser parser = new JsonTemplateParser(new CommonTokenStream(lexer));
+        setErrorHandlers(src, path, lexer);
+        setErrorHandlers(src, path, parser);
+        return parser.lambda();
+    }
+
     public static ReferenceResult resolve(String reference, JSONObject scope, String path) {
         return resolve(reference, new JSONObject(), scope, null, path);
     }
