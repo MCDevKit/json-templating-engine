@@ -24,7 +24,7 @@ public class FunctionDefinition {
         NAME_MAP.put(Boolean.class, "<Boolean>");
         NAME_MAP.put(String.class, "<String>");
         NAME_MAP.put(Long.class, "<Long>");
-        NAME_MAP.put(Function.class, "<Lambda>");
+        NAME_MAP.put(JSONLambda.class, "<Lambda>");
     }
 
     private final List<Class<?>[]> types = new ArrayList<>();
@@ -52,10 +52,11 @@ public class FunctionDefinition {
                         .filter(classes -> paramCheck(params, classes.getValue()))
                         .collect(Collectors.toList());
         if (matching.size() == 0) {
-            throw new JsonTemplatingException(String.format("Function '%s' got unexpected params. Expected one of %s", name, sizeMatching
+            throw new JsonTemplatingException(String.format("Function '%s' got unexpected params. Expected %s, but got %s", name, sizeMatching
                     .stream()
                     .map(integerPair -> toString(integerPair.getValue()))
-                    .collect(Collectors.joining(", "))), path);
+                    .collect(Collectors.joining(", ")),
+                    toString(params)), path);
         }
         else if (matching.size() == 1) {
             Pair<Integer, Class<?>[]> pair = matching.get(0);
@@ -78,6 +79,10 @@ public class FunctionDefinition {
 
     private String toString(Class<?>[] classes) {
         return name + "(" + Arrays.stream(classes).map(NAME_MAP::get).collect(Collectors.joining(", ")) + ")";
+    }
+
+    private String toString(Object[] params) {
+        return "(" + Arrays.stream(params).map(Object::getClass).map(key -> NAME_MAP.getOrDefault(key, key.getName())).collect(Collectors.joining(", ")) + ")";
     }
 
     @SuppressWarnings("unchecked")
@@ -117,8 +122,8 @@ public class FunctionDefinition {
             else if (cls == Boolean.class) {
                 return (T) Boolean.FALSE;
             }
-            else if (cls == Function.class) {
-                return (T) (Function<Object, Object>) o -> o;
+            else if (cls == JSONLambda.class) {
+                return (T) JSONLambda.identity();
             }
             throw new IllegalArgumentException("Unexpected type: " + cls.getName());
         }

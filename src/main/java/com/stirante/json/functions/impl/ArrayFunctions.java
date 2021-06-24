@@ -2,6 +2,7 @@ package com.stirante.json.functions.impl;
 
 import com.stirante.json.exception.JsonTemplatingException;
 import com.stirante.json.functions.JSONFunction;
+import com.stirante.json.functions.JSONLambda;
 import com.stirante.json.utils.JsonUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -194,10 +195,10 @@ public class ArrayFunctions {
      * </code>
      */
     @JSONFunction
-    private static JSONArray filter(JSONArray arr, Function<Object, Object> predicate) {
+    private static JSONArray filter(JSONArray arr, JSONLambda predicate) {
         return new JSONArray(arr.toList()
                 .stream()
-                .filter(o -> JsonUtils.toBoolean(predicate.apply(o)))
+                .filter(o -> JsonUtils.toBoolean(predicate.execute(o)))
                 .collect(Collectors.toList()));
     }
 
@@ -216,8 +217,8 @@ public class ArrayFunctions {
      * </code>
      */
     @JSONFunction
-    private static JSONArray map(JSONArray arr, Function<Object, Object> predicate) {
-        return new JSONArray(arr.toList().stream().map(predicate).collect(Collectors.toList()));
+    private static JSONArray map(JSONArray arr, JSONLambda predicate) {
+        return new JSONArray(arr.toList().stream().map(predicate::execute).collect(Collectors.toList()));
     }
 
     /**
@@ -235,9 +236,9 @@ public class ArrayFunctions {
      * </code>
      */
     @JSONFunction
-    private static JSONArray flatMap(JSONArray arr, Function<Object, Object> predicate) {
+    private static JSONArray flatMap(JSONArray arr, JSONLambda predicate) {
         return new JSONArray(arr.toList().stream().flatMap(o -> {
-            Object apply = predicate.apply(o);
+            Object apply = predicate.execute(o);
             return apply instanceof JSONArray ? ((JSONArray) apply).toList()
                     .stream() : apply instanceof Collection ? ((Collection<?>) apply).stream() : Stream.of(apply);
         }).collect(Collectors.toList()));
@@ -267,10 +268,10 @@ public class ArrayFunctions {
      * </code>
      */
     @JSONFunction
-    private static Long count(JSONArray arr, Function<Object, Object> predicate) {
+    private static Long count(JSONArray arr, JSONLambda predicate) {
         return arr.toList()
                 .stream()
-                .filter(o -> JsonUtils.toBoolean(predicate.apply(o)))
+                .filter(o -> JsonUtils.toBoolean(predicate.execute(o)))
                 .count();
     }
 
@@ -294,10 +295,10 @@ public class ArrayFunctions {
      * </code>
      */
     @JSONFunction
-    private static Object findFirst(JSONArray arr, Function<Object, Object> predicate) {
+    private static Object findFirst(JSONArray arr, JSONLambda predicate) {
         return arr.toList()
                 .stream()
-                .filter(o -> JsonUtils.toBoolean(predicate.apply(o)))
+                .filter(o -> JsonUtils.toBoolean(predicate.execute(o)))
                 .findFirst()
                 .orElseThrow(() -> new JsonTemplatingException("No matching items found!"));
     }

@@ -66,6 +66,7 @@ reference
 
 lambda
     : name Arrow reference
+    | LeftParen name (Comma name)* RightParen Arrow reference
     ;
 
 function

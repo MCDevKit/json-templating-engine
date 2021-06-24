@@ -1,6 +1,7 @@
 package com.stirante.json;
 
 import com.stirante.json.exception.JsonTemplatingException;
+import com.stirante.json.functions.JSONLambda;
 import com.stirante.json.utils.JsonUtils;
 import com.stirante.json.utils.StringUtils;
 import org.json.JSONArray;
@@ -323,8 +324,13 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
 
     @Override
     public Object visitLambda(JsonTemplateParser.LambdaContext ctx) {
-        return (Function<Object, Object>) o -> {
-            pushScope(ctx.name().getText(), o);
+        return (JSONLambda) o -> {
+            if (ctx.name().size() > o.length) {
+                throw new JsonTemplatingException("Lambda requires " +ctx.name().size() + " parameters, but only " + o.length + " were supplied!", path);
+            }
+            for (int i = 0; i < o.length; i++) {
+                pushScope(ctx.name(i).getText(), o[i]);
+            }
             Object result = visit(ctx.reference());
             popScope();
             return result;

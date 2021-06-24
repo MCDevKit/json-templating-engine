@@ -3,6 +3,7 @@ package com.stirante.json;
 import com.stirante.json.exception.JsonTemplatingException;
 import com.stirante.json.functions.FunctionDefinition;
 import com.stirante.json.functions.JSONFunction;
+import com.stirante.json.functions.JSONLambda;
 import com.stirante.json.functions.impl.*;
 import com.stirante.json.utils.JsonUtils;
 import com.stirante.justpipe.Pipe;
@@ -15,7 +16,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,7 +27,7 @@ public class JsonProcessor {
     private static final String[] DANGEROUS_FUNCTIONS = {"fileList", "fileListRecurse", "imageWidth", "imageHeight"};
     public static final Map<String, FunctionDefinition> FUNCTIONS = new HashMap<>();
     private static final List<Class<?>> ALLOWED_TYPES = Arrays.asList(
-            String.class, Integer.class, Double.class, Float.class, Number.class, Boolean.class, Long.class, JSONArray.class, JSONObject.class, Function.class, Object.class);
+            String.class, Integer.class, Double.class, Float.class, Number.class, Boolean.class, Long.class, JSONArray.class, JSONObject.class, JSONLambda.class, Object.class);
 
     private static boolean SAFE_MODE = false;
 
@@ -368,7 +368,7 @@ public class JsonProcessor {
         }
         else {
             Matcher m = TEMPLATE_PATTERN.matcher(String.valueOf(element));
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             boolean isNumber = element instanceof Number;
             boolean isLong = element instanceof Long;
             boolean isBoolean = element instanceof Boolean;
@@ -391,7 +391,7 @@ public class JsonProcessor {
                 try {
                     return isLong ? Long.parseLong(sb.toString()) : Float.parseFloat(sb.toString());
                 } catch (NumberFormatException e) {
-                    throw new JsonTemplatingException("Expected a number, but got \"" + sb.toString() + "\"", path);
+                    throw new JsonTemplatingException("Expected a number, but got \"" + sb + "\"", path);
                 }
             }
             if (isBoolean) {
