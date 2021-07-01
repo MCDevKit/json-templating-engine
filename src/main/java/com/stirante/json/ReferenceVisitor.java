@@ -83,6 +83,8 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             }
             Object f1 = visit(ctx.reference(0));
             Object f2 = visit(ctx.reference(1));
+            Number n1 = JsonUtils.toNumber(f1);
+            Number n2 = JsonUtils.toNumber(f2);
             if (ctx.Add() != null) {
                 if (f1 instanceof Number && f2 instanceof Number) {
                     boolean decimal = f1 instanceof Float || f1 instanceof Double || f2 instanceof Float ||
@@ -118,41 +120,41 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                 return arr;
             }
             else {
-                if (f1 instanceof Number && f2 instanceof Number) {
+                if (n1 != null && n2 != null) {
                     if (ctx.Greater() != null) {
-                        return ((Number) f1).doubleValue() > ((Number) f2).doubleValue();
+                        return n1.doubleValue() > n2.doubleValue();
                     }
                     if (ctx.Less() != null) {
-                        return ((Number) f1).doubleValue() < ((Number) f2).doubleValue();
+                        return n1.doubleValue() < n2.doubleValue();
                     }
                     if (ctx.GreaterOrEqual() != null) {
-                        return ((Number) f1).doubleValue() >= ((Number) f2).doubleValue();
+                        return n1.doubleValue() >= n2.doubleValue();
                     }
                     if (ctx.LessOrEqual() != null) {
-                        return ((Number) f1).doubleValue() <= ((Number) f2).doubleValue();
+                        return n1.doubleValue() <= n2.doubleValue();
                     }
-                    boolean decimal = f1 instanceof Float || f1 instanceof Double || f2 instanceof Float ||
-                            f2 instanceof Double;
+                    boolean decimal = n1 instanceof Float || n1 instanceof Double || n2 instanceof Float ||
+                            n2 instanceof Double;
                     if (decimal) {
                         if (ctx.Subtract() != null) {
-                            return ((Number) f1).doubleValue() - ((Number) f2).doubleValue();
+                            return n1.doubleValue() - n2.doubleValue();
                         }
                         if (ctx.Divide() != null) {
-                            return ((Number) f1).doubleValue() / ((Number) f2).doubleValue();
+                            return n1.doubleValue() / n2.doubleValue();
                         }
                         if (ctx.Multiply() != null) {
-                            return ((Number) f1).doubleValue() * ((Number) f2).doubleValue();
+                            return n1.doubleValue() * n2.doubleValue();
                         }
                     }
                     else {
                         if (ctx.Subtract() != null) {
-                            return ((Number) f1).intValue() - ((Number) f2).intValue();
+                            return n1.intValue() - n2.intValue();
                         }
                         if (ctx.Divide() != null) {
-                            return ((Number) f1).intValue() / ((Number) f2).intValue();
+                            return n1.intValue() / n2.intValue();
                         }
                         if (ctx.Multiply() != null) {
-                            return ((Number) f1).intValue() * ((Number) f2).intValue();
+                            return n1.intValue() * n2.intValue();
                         }
                     }
                 }
@@ -224,10 +226,12 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                 Object func = visit(lambdaContext);
                 if (func instanceof JSONLambda) {
                     return ((JSONLambda) func).apply(params);
-                } else {
+                }
+                else {
                     throw new JsonTemplatingException("Function '" + context.field().getText() + "' not found!", path);
                 }
-            } else {
+            }
+            else {
                 String methodName = context.field().name().getText();
                 if (!JsonProcessor.FUNCTIONS.containsKey(methodName)) {
                     throw new JsonTemplatingException("Function '" + methodName + "' not found!", path);
@@ -280,7 +284,9 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                     throw new JsonTemplatingException("Array index is not a number!", path);
                 }
                 int index = ((Number) i).intValue();
-                if (index >= arr.length() || index < 0) throw new JsonTemplatingException("Array index out of bounds!", path);
+                if (index >= arr.length() || index < 0) {
+                    throw new JsonTemplatingException("Array index out of bounds!", path);
+                }
                 return arr.toList().get(index);
             }
             // After adding lambdas, we also need to check for lists
@@ -290,7 +296,9 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                     throw new JsonTemplatingException("Array index is not a number!", path);
                 }
                 int index = ((Number) i).intValue();
-                if (index >= arr.size() || index < 0) throw new JsonTemplatingException("Array index out of bounds!", path);
+                if (index >= arr.size() || index < 0) {
+                    throw new JsonTemplatingException("Array index out of bounds!", path);
+                }
                 return arr.get(index);
             }
             else if (object instanceof JSONObject) {
@@ -340,7 +348,9 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     public Object visitLambda(JsonTemplateParser.LambdaContext ctx) {
         return (JSONLambda) o -> {
             if (ctx.name().size() > o.length) {
-                throw new JsonTemplatingException("Lambda requires " +ctx.name().size() + " parameters, but only " + o.length + " were supplied!", path);
+                throw new JsonTemplatingException(
+                        "Lambda requires " + ctx.name().size() + " parameters, but only " + o.length +
+                                " were supplied!", path);
             }
             for (int i = 0; i < o.length; i++) {
                 pushScope(ctx.name(i).getText(), o[i]);

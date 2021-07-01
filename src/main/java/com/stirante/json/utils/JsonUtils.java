@@ -27,9 +27,11 @@ public class JsonUtils {
     private static <T> void removeNulls(Object o, T param, Consumer<T> remove) {
         if (o == JSONObject.NULL || (o instanceof String && o.equals("null"))) {
             remove.accept(param);
-        } else if (o instanceof JSONObject) {
+        }
+        else if (o instanceof JSONObject) {
             removeNulls((JSONObject) o);
-        } else if (o instanceof JSONArray) {
+        }
+        else if (o instanceof JSONArray) {
             removeNulls((JSONArray) o);
         }
     }
@@ -58,7 +60,8 @@ public class JsonUtils {
                     if (template.get(s) instanceof JSONArray) {
                         merge(template.getJSONArray(s), parent.getJSONArray(s));
                     }
-                    else if (template.get(s) == JSONObject.NULL || (template.get(s) instanceof String && template.getString(s).equals("null"))) {
+                    else if (template.get(s) == JSONObject.NULL ||
+                            (template.get(s) instanceof String && template.getString(s).equals("null"))) {
                         template.remove(s);
                     }
                     else {
@@ -115,6 +118,27 @@ public class JsonUtils {
                 (o instanceof Boolean && (Boolean) o) ||
                 (o instanceof Number && ((Number) o).doubleValue() != 0) ||
                 (o instanceof String && !((String) o).isEmpty()));
+    }
+
+    public static Number toNumber(Object o) {
+        if (o instanceof Number) {
+            return (Number) o;
+        }
+        else if (o instanceof String) {
+            if (((String) o).indexOf('.') != -1) {
+                try {
+                    return Double.parseDouble(o.toString());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            else {
+                try {
+                    return Integer.parseInt(o.toString());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+        return null;
     }
 
     public static Object getByIndex(JSONObject obj, int index) {
