@@ -19,6 +19,8 @@ public class StringUtils {
                 .substring(1, str.length() - 1)
                 // Escape quotes
                 .replaceAll("\\\\\"", "\"")
+                // Escape apostrophes
+                .replaceAll("\\\\'", "'")
                 // Escape newlines
                 .replaceAll("\\\\n", "\n")
                 // Escape backslash

@@ -104,7 +104,7 @@ public class Main {
                                         }
                                         else {
                                             System.out.println(pipe.get("name") + ".json" + ":");
-                                            System.out.println(pipe.toString());
+                                            System.out.println(pipe);
                                         }
                                     });
                         } catch (IOException e) {
