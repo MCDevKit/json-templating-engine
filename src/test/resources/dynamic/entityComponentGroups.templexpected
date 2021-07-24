@@ -4,16 +4,11 @@ File entityComponentGroups
   "minecraft:entity": {
     "description": {
       "identifier": "egg:gallery_egg",
-      "runtime_identifier": "minecraft:thrown_trident",
+      "is_spawnable": false,
       "is_summonable": true,
-      "is_spawnable": false
+      "runtime_identifier": "minecraft:thrown_trident"
     },
     "components": {
-      "minecraft:push_through": {"value": 0},
-      "minecraft:collision_box": {
-        "width": 1,
-        "height": 1
-      },
       "minecraft:persistent": {},
       "minecraft:damage_sensor": {"triggers": [{
         "deals_damage": false,
@@ -28,44 +23,40 @@ File entityComponentGroups
           }
         ]}}
       }]},
-      "minecraft:knockback_resistance": {
-        "max": 100,
-        "value": 100
-      },
-      "minecraft:health": {
-        "max": 100,
-        "value": 100
-      },
       "minecraft:pushable": {
         "is_pushable": false,
         "is_pushable_by_piston": false
       },
-      "minecraft:scale": {"value": 2},
-      "minecraft:type_family": {"family": ["egg"]}
+      "minecraft:push_through": {"value": 0},
+      "minecraft:knockback_resistance": {
+        "value": 100,
+        "max": 100
+      },
+      "minecraft:health": {
+        "value": 100,
+        "max": 100
+      },
+      "minecraft:type_family": {"family": ["egg"]},
+      "minecraft:collision_box": {
+        "width": 1,
+        "height": 1
+      },
+      "minecraft:scale": {"value": 2}
     },
     "component_groups": {
-      "timer:4": {"minecraft:mark_variant": {"value": 4}},
-      "timer:3": {"minecraft:mark_variant": {"value": 3}},
-      "timer:2": {"minecraft:mark_variant": {"value": 2}},
-      "timer:1": {"minecraft:mark_variant": {"value": 1}},
+      "egg:red": {"minecraft:variant": {"value": 0}},
+      "egg:green": {"minecraft:variant": {"value": 1}},
       "egg:blue": {"minecraft:variant": {"value": 2}},
       "timer:0": {"minecraft:mark_variant": {"value": 0}},
-      "egg:green": {"minecraft:variant": {"value": 1}},
-      "egg:red": {"minecraft:variant": {"value": 0}},
-      "timer:7": {"minecraft:mark_variant": {"value": 7}},
+      "timer:1": {"minecraft:mark_variant": {"value": 1}},
+      "timer:2": {"minecraft:mark_variant": {"value": 2}},
+      "timer:3": {"minecraft:mark_variant": {"value": 3}},
+      "timer:4": {"minecraft:mark_variant": {"value": 4}},
+      "timer:5": {"minecraft:mark_variant": {"value": 5}},
       "timer:6": {"minecraft:mark_variant": {"value": 6}},
-      "timer:5": {"minecraft:mark_variant": {"value": 5}}
+      "timer:7": {"minecraft:mark_variant": {"value": 7}}
     },
     "events": {
-      "egg:blue": {"add": {"component_groups": [
-        "egg:blue",
-        "red",
-        "green",
-        "blue",
-        2,
-        3,
-        4
-      ]}},
       "egg:red": {"add": {"component_groups": [
         "egg:red",
         "red",
@@ -83,6 +74,15 @@ File entityComponentGroups
         "green",
         "blue",
         1,
+        2,
+        3,
+        4
+      ]}},
+      "egg:blue": {"add": {"component_groups": [
+        "egg:blue",
+        "red",
+        "green",
+        "blue",
         2,
         3,
         4

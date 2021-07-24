@@ -1,36 +1,8 @@
 File jsonFunctions
 {
-  "utility": {"asArray": [
-    {
-      "value": "anotherVal",
-      "key": "test2"
-    },
-    {
-      "value": "someVal",
-      "key": "test1"
-    }
-  ]},
-  "files": {
-    "fileListFiltered": [
-      "conditionals.templ",
-      "differentEntities.templ",
-      "entityComponentGroups.templ",
-      "jsonFunctions.templ"
-    ],
-    "fileList": [
-      "conditionals.templ",
-      "conditionals.templexpected",
-      "differentEntities.templ",
-      "differentEntities.templexpected",
-      "entityComponentGroups.templ",
-      "entityComponentGroups.templexpected",
-      "jsonFunctions.templ",
-      "jsonFunctions.templexpected"
-    ]
-  },
   "math": {
-    "floor": "3",
     "mod": "2.0",
+    "floor": "3",
     "ceil": "4"
   },
   "color": {"hexToArray": [
@@ -40,26 +12,57 @@ File jsonFunctions
     1
   ]},
   "string": {
-    "replace": "this_is_a_test",
     "contains": "true",
+    "indexOf": "4",
+    "replace": "this_is_a_test",
+    "join": "this_is_a_test",
     "split": [
       "this",
       "is",
       "a",
       "test"
-    ],
-    "join": "this_is_a_test",
-    "indexOf": "4"
+    ]
   },
+  "utility": {"asArray": [
+    {
+      "key": "test1",
+      "value": "someVal"
+    },
+    {
+      "key": "test2",
+      "value": "anotherVal"
+    }
+  ]},
   "array": {
     "keys": [
-      "test2",
-      "test1"
+      "test1",
+      "test2"
     ],
-    "first": "0",
     "values": [
       "anotherVal",
       "someVal"
+    ],
+    "first": "0"
+  },
+  "files": {
+    "fileList": [
+      "conditionals.templ",
+      "conditionals.templexpected",
+      "differentEntities.templ",
+      "differentEntities.templexpected",
+      "entityComponentGroups.templ",
+      "entityComponentGroups.templexpected",
+      "jsonFunctions.templ",
+      "jsonFunctions.templexpected",
+      "order.templ",
+      "order.templexpected"
+    ],
+    "fileListFiltered": [
+      "conditionals.templ",
+      "differentEntities.templ",
+      "entityComponentGroups.templ",
+      "jsonFunctions.templ",
+      "order.templ"
     ]
   }
 }

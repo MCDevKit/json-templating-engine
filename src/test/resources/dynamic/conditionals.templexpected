@@ -4,16 +4,11 @@ File conditionals
   "minecraft:entity": {
     "description": {
       "identifier": "test:test",
-      "runtime_identifier": "minecraft:thrown_trident",
+      "is_spawnable": false,
       "is_summonable": true,
-      "is_spawnable": false
+      "runtime_identifier": "minecraft:thrown_trident"
     },
     "components": {
-      "minecraft:push_through": {"value": 0},
-      "minecraft:collision_box": {
-        "width": 1,
-        "height": 1
-      },
       "minecraft:persistent": {},
       "minecraft:damage_sensor": {"triggers": [{
         "deals_damage": false,
@@ -28,38 +23,32 @@ File conditionals
           }
         ]}}
       }]},
-      "minecraft:knockback_resistance": {
-        "max": 100,
-        "value": 100
-      },
-      "minecraft:health": {
-        "max": 100,
-        "value": 100
-      },
       "minecraft:pushable": {
         "is_pushable": false,
         "is_pushable_by_piston": false
       },
-      "minecraft:scale": {"value": 2},
-      "minecraft:type_family": {"family": ["egg"]}
+      "minecraft:push_through": {"value": 0},
+      "minecraft:knockback_resistance": {
+        "value": 100,
+        "max": 100
+      },
+      "minecraft:health": {
+        "value": 100,
+        "max": 100
+      },
+      "minecraft:type_family": {"family": ["egg"]},
+      "minecraft:collision_box": {
+        "width": 1,
+        "height": 1
+      },
+      "minecraft:scale": {"value": 2}
     },
     "component_groups": {
-      "egg:blue": {"minecraft:variant": {"value": -1}},
       "egg:red": {"minecraft:variant": {"value": 6}},
-      "egg:green": {"minecraft:variant": {"value": -1}}
+      "egg:green": {"minecraft:variant": {"value": -1}},
+      "egg:blue": {"minecraft:variant": {"value": -1}}
     },
     "events": {
-      "egg:blue": {"add": {"component_groups": [
-        "egg:blue",
-        "Zero",
-        "Dynamic ranges -2",
-        "Dynamic ranges -1",
-        "Dynamic ranges 0",
-        "Dynamic ranges 1",
-        "Dynamic ranges 2",
-        "Dynamic ranges 3",
-        "com/stirante/json/JsonProcessorTest.java"
-      ]}},
       "egg:red": {"add": {"component_groups": [
         "egg:red",
         "Number minus one is 4",
@@ -74,6 +63,17 @@ File conditionals
         "Dynamic ranges 0",
         "Dynamic ranges 1",
         "Dynamic ranges 2",
+        "com/stirante/json/JsonProcessorTest.java"
+      ]}},
+      "egg:blue": {"add": {"component_groups": [
+        "egg:blue",
+        "Zero",
+        "Dynamic ranges -2",
+        "Dynamic ranges -1",
+        "Dynamic ranges 0",
+        "Dynamic ranges 1",
+        "Dynamic ranges 2",
+        "Dynamic ranges 3",
         "com/stirante/json/JsonProcessorTest.java"
       ]}}
     }

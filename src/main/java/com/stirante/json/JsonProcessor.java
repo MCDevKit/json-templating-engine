@@ -310,7 +310,7 @@ public class JsonProcessor {
         else if (element instanceof JSONObject) {
             JSONObject obj = (JSONObject) element;
             List<String> toRemove = new ArrayList<>();
-            Map<String, Object> toAdd = new HashMap<>();
+            Map<String, Object> toAdd = new LinkedHashMap<>();
             for (String s : obj.keySet()) {
                 if (ACTION_PATTERN.matcher(s).matches()) {
                     ReferenceResult e = resolve(s, extraScope, fullScope, currentScope, path);

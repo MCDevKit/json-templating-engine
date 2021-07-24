@@ -36,7 +36,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>jsonc</artifactId>
-            <version>v20200429-SNAPSHOT</version>
+            <version>v20210307-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
