@@ -170,7 +170,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             }
         } else if (ctx.reference().size() == 3) {
             if (ctx.Predicate() != null) {
-                return JsonUtils.toBoolean(visit(ctx.reference(0))) ? visit(ctx.reference(1)) : visit(ctx.reference(1));
+                return JsonUtils.toBoolean(visit(ctx.reference(0))) ? visit(ctx.reference(1)) : visit(ctx.reference(2));
             }
         }
         return null;

@@ -47,7 +47,6 @@ action
 
 reference
    : field
-   | reference Predicate reference (':' reference)?
    | Subtract reference
    | reference Range reference
    | reference (Divide | Multiply) reference
@@ -61,6 +60,7 @@ reference
    | reference And reference
    | reference Or reference
    | Not reference
+   | reference Predicate reference (':' reference)?
    | LeftParen reference RightParen
    ;
 
