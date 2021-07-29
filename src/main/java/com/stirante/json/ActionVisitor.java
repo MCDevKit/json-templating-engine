@@ -1,6 +1,5 @@
 package com.stirante.json;
 
-import com.stirante.json.utils.JsonUtils;
 import org.json.JSONObject;
 
 public class ActionVisitor extends JsonTemplateBaseVisitor<ReferenceResult> {
@@ -26,25 +25,10 @@ public class ActionVisitor extends JsonTemplateBaseVisitor<ReferenceResult> {
             a = JsonAction.LITERAL;
         }
         else if (ctx.Predicate() != null) {
-            if (ctx.reference().size() > 1) {
-                Object predicateResult =
-                        new ReferenceVisitor(extraScope, fullScope, currentScope, path, a).visit(ctx.reference(0));
-                if (JsonUtils.toBoolean(predicateResult)) {
-                    return new ReferenceResult(new ReferenceVisitor(extraScope, fullScope, currentScope, path, a)
-                            .visit(ctx.reference(1)), a,
-                            ctx.As() != null ? ctx.name().getText() : "value");
-                }
-                else if (ctx.reference().size() == 3) {
-                    return new ReferenceResult(new ReferenceVisitor(extraScope, fullScope, currentScope, path, a)
-                            .visit(ctx.reference(2)), a,
-                            ctx.As() != null ? ctx.name().getText() : "value");
-                }
-            } else {
-                a = JsonAction.PREDICATE;
-            }
+            a = JsonAction.PREDICATE;
         }
         return new ReferenceResult(new ReferenceVisitor(extraScope, fullScope, currentScope, path, a)
-                .visit(ctx.reference(0)), a,
+                .visit(ctx.reference()), a,
                 ctx.As() != null ? ctx.name().getText() : "value");
     }
 }

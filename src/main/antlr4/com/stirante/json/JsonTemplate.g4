@@ -41,13 +41,13 @@ True: 'true';
 action
     : LeftMustache? Iteration reference (As name)? RightMustache?
     | LeftMustache? Predicate reference RightMustache?
-    | LeftMustache? reference Predicate reference (':' reference)? RightMustache?
     | LeftMustache? Literal reference RightMustache?
     | LeftMustache? reference RightMustache?
     ;
 
 reference
    : field
+   | reference Predicate reference (':' reference)?
    | Subtract reference
    | reference Range reference
    | reference (Divide | Multiply) reference
