@@ -92,7 +92,7 @@ field
    ;
 
 array
-    : LeftBracket (field (Comma field)*)? RightBracket
+    : LeftBracket (reference (Comma reference)*)? RightBracket
     ;
 
 name

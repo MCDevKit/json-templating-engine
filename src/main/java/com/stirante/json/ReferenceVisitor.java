@@ -52,7 +52,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     @Override
     public Object visitArray(JsonTemplateParser.ArrayContext ctx) {
         JSONArray result = new JSONArray();
-        for (JsonTemplateParser.FieldContext f : ctx.field()) {
+        for (JsonTemplateParser.ReferenceContext f : ctx.reference()) {
             result.put(visit(f));
         }
         return result;
