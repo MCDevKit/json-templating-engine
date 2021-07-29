@@ -183,7 +183,7 @@ public class ArrayFunctions {
     /**
      * Returns a new array that is filtered based on a predicate.
      * @param arr array: Source array
-     * @param predicate predicate: Lambda, that should return whether an element should remain
+     * @param predicate predicate(element, index): Lambda, that should return whether an element should remain
      * @example
      * <code>
      * {
@@ -196,16 +196,19 @@ public class ArrayFunctions {
      */
     @JSONFunction
     private static JSONArray filter(JSONArray arr, JSONLambda predicate) {
-        return new JSONArray(arr.toList()
-                .stream()
-                .filter(o -> JsonUtils.toBoolean(predicate.execute(o)))
-                .collect(Collectors.toList()));
+        List<Object> objects = arr.toList();
+        for (int i = objects.size() - 1; i >= 0; i--) {
+            if (!JsonUtils.toBoolean(predicate.execute(objects.get(i), i))) {
+                objects.remove(i);
+            }
+        }
+        return new JSONArray(objects);
     }
 
     /**
      * Returns a new array, where every element is mapped to another value using provided lambda.
      * @param arr array: Source array
-     * @param predicate lambda: Lambda, that should return new element value
+     * @param predicate lambda(element, index): Lambda, that should return new element value
      * @example
      * <code>
      * {
@@ -218,13 +221,17 @@ public class ArrayFunctions {
      */
     @JSONFunction
     private static JSONArray map(JSONArray arr, JSONLambda predicate) {
-        return new JSONArray(arr.toList().stream().map(predicate::execute).collect(Collectors.toList()));
+        List<Object> objects = arr.toList();
+        for (int i = 0; i < objects.size(); i++) {
+            objects.set(i, predicate.execute(objects.get(i), i));
+        }
+        return new JSONArray(objects);
     }
 
     /**
      * Returns a new array, where every array from lambda is merged into source array.
      * @param arr array: Source array
-     * @param predicate lambda: Lambda, that should return an array to merge. If none provided, it will use identity lambda (`x => x`)
+     * @param predicate lambda(element, index): Lambda, that should return an array to merge. If none provided, it will use identity lambda (`x => x`)
      * @example
      * <code>
      * {
@@ -237,11 +244,15 @@ public class ArrayFunctions {
      */
     @JSONFunction
     private static JSONArray flatMap(JSONArray arr, JSONLambda predicate) {
-        return new JSONArray(arr.toList().stream().flatMap(o -> {
-            Object apply = predicate.execute(o);
-            return apply instanceof JSONArray ? ((JSONArray) apply).toList()
-                    .stream() : apply instanceof Collection ? ((Collection<?>) apply).stream() : Stream.of(apply);
-        }).collect(Collectors.toList()));
+        List<Object> objects = arr.toList();
+        for (int i = 0; i < objects.size(); i++) {
+            objects.set(i, predicate.execute(objects.get(i), i));
+        }
+        return new JSONArray(objects.stream()
+                .flatMap(o -> o instanceof JSONArray ?
+                        ((JSONArray) o).toList().stream() : o instanceof Collection ?
+                        ((Collection<?>) o).stream() : Stream.of(o))
+                .collect(Collectors.toList()));
     }
 
     @JSONFunction
@@ -256,7 +267,7 @@ public class ArrayFunctions {
     /**
      * Returns the number of elements in an array.
      * @param arr array: Source array
-     * @param predicate predicate: (optional) Lambda, that should return whether an element should be counted
+     * @param predicate predicate(element, index): (optional) Lambda, that should return whether an element should be counted
      * @example
      * <code>
      * {
@@ -269,10 +280,13 @@ public class ArrayFunctions {
      */
     @JSONFunction
     private static Long count(JSONArray arr, JSONLambda predicate) {
-        return arr.toList()
-                .stream()
-                .filter(o -> JsonUtils.toBoolean(predicate.execute(o)))
-                .count();
+        List<Object> objects = arr.toList();
+        for (int i = objects.size() - 1; i >= 0; i--) {
+            if (!JsonUtils.toBoolean(predicate.execute(objects.get(i), i))) {
+                objects.remove(i);
+            }
+        }
+        return (long) objects.size();
     }
 
     @JSONFunction
@@ -283,7 +297,7 @@ public class ArrayFunctions {
     /**
      * Returns the first element from an array filtered by the predicate.
      * @param arr array: Source array
-     * @param predicate predicate: Lambda, that should return whether an element should remain
+     * @param predicate predicate(element, index): Lambda, that should return whether an element should remain
      * @example
      * <code>
      * {
@@ -296,11 +310,13 @@ public class ArrayFunctions {
      */
     @JSONFunction
     private static Object findFirst(JSONArray arr, JSONLambda predicate) {
-        return arr.toList()
-                .stream()
-                .filter(o -> JsonUtils.toBoolean(predicate.execute(o)))
-                .findFirst()
-                .orElseThrow(() -> new JsonTemplatingException("No matching items found!"));
+        List<Object> objects = arr.toList();
+        for (int i = objects.size() - 1; i >= 0; i--) {
+            if (JsonUtils.toBoolean(predicate.execute(objects.get(i), i))) {
+                return objects.get(i);
+            }
+        }
+        throw new JsonTemplatingException("No matching items found!");
     }
 
 }

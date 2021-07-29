@@ -27,7 +27,11 @@
     "array": {
       "keys": "{{keys(testObject)}}",
       "values": "{{values(testObject)}}",
-      "first": "{{findFirst(0..6, x => mod(x, 2) == 0)}}"
+      "first": "{{findFirst(0..6, x => mod(x, 2) == 0)}}",
+      "map": "{{map(1..10, x => x * 2)}}",
+      "mapWithIndex": "{{map(1..10, (x, i) => i)}}",
+      "filter": "{{filter(1..10, x => mod(x, 2) == 0)}}",
+      "filterWithIndex": "{{filter(1..10, (x, i) => mod(i, 2) == 0)}}"
     },
     "files": {
       "fileList": "{{fileList('src/test/resources/dynamic')}}",

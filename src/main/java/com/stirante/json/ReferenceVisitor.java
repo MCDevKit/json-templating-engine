@@ -352,7 +352,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                         "Lambda requires " + ctx.name().size() + " parameters, but only " + o.length +
                                 " were supplied!", path);
             }
-            for (int i = 0; i < o.length; i++) {
+            for (int i = 0; i < ctx.name().size(); i++) {
                 pushScope(ctx.name(i).getText(), o[i]);
             }
             Object result = visit(ctx.reference());
