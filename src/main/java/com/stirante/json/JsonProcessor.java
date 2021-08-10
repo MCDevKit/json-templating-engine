@@ -24,7 +24,8 @@ public class JsonProcessor {
     private static final Pattern TEMPLATE_PATTERN = Pattern.compile("\\{\\{[^{}]+}}");
     private static final Pattern ACTION_PATTERN = Pattern.compile("^\\{\\{[^{}]+}}$");
 
-    private static final String[] DANGEROUS_FUNCTIONS = {"fileList", "fileListRecurse", "imageWidth", "imageHeight", "getMinecraftInstallDir"};
+    private static final String[] DANGEROUS_FUNCTIONS =
+            {"fileList", "fileListRecurse", "imageWidth", "imageHeight", "getMinecraftInstallDir", "audioDuration"};
     public static final Map<String, FunctionDefinition> FUNCTIONS = new HashMap<>();
     private static final List<Class<?>> ALLOWED_TYPES = Arrays.asList(
             String.class, Integer.class, Double.class, Float.class, Number.class, Boolean.class, Long.class, JSONArray.class, JSONObject.class, JSONLambda.class, Object.class);
@@ -42,6 +43,7 @@ public class JsonProcessor {
         register(UtilityFunctions.class);
         register(ArrayFunctions.class);
         register(MinecraftFunctions.class);
+        register(AudioFunctions.class);
     }
 
     public static FunctionDefinition defineFunction(String name) {
@@ -141,7 +143,8 @@ public class JsonProcessor {
                 extra.put("index", i);
                 extra.put("value", array.get(i));
                 if (isCopy) {
-                    String copyPath = processTemplateValues(new JSONObject(), scope, new JSONObject(), name + "#/$copy", root.getString("$copy")).toString();
+                    String copyPath = processTemplateValues(new JSONObject(), scope, new JSONObject(),
+                            name + "#/$copy", root.getString("$copy")).toString();
                     if (copyPath.endsWith(".templ")) {
                         Map<String, String> map =
                                 processJson("copy", Pipe.from(new File(String.valueOf(processTemplateValues(extra, scope, array
@@ -174,7 +177,8 @@ public class JsonProcessor {
         }
         else {
             if (isCopy) {
-                String copyPath = processTemplateValues(new JSONObject(), scope, new JSONObject(), name + "#/$copy", root.getString("$copy")).toString();
+                String copyPath = processTemplateValues(new JSONObject(), scope, new JSONObject(),
+                        name + "#/$copy", root.getString("$copy")).toString();
                 if (copyPath.endsWith(".templ")) {
                     Map<String, String> map =
                             processJson("copy", Pipe.from(new File(String.valueOf(processTemplateValues(new JSONObject(), scope, new JSONObject(), "$copy", copyPath))))
