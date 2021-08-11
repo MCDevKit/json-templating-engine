@@ -27,13 +27,13 @@ public class ImageUtils {
             if (read != 4) {
                 throw new EOFException();
             }
-            if (compare(header, PNG_HEADER)) {
+            if (FileFormatUtils.compare(header, PNG_HEADER)) {
                 return getPngBounds(in);
             }
-            else if (compare(header, JPG_HEADER)) {
+            else if (FileFormatUtils.compare(header, JPG_HEADER)) {
                 return getJpgBounds(in);
             }
-            else if (compare(header, JPG_EXIF_HEADER)) {
+            else if (FileFormatUtils.compare(header, JPG_EXIF_HEADER)) {
                 return getJpgExifBounds(in);
             }
             else {
@@ -48,7 +48,7 @@ public class ImageUtils {
         if (read != 4) {
             throw new EOFException();
         }
-        if (!compare(header, PNG_HEADER_ENDING)) {
+        if (!FileFormatUtils.compare(header, PNG_HEADER_ENDING)) {
             throw new IllegalArgumentException("File is not in a PNG format!");
         }
         in.skipBytes(4);
@@ -85,7 +85,7 @@ public class ImageUtils {
         if (read != 6) {
             throw new EOFException();
         }
-        if (!compare(buffer, EXIF_CONSTANT)) {
+        if (!FileFormatUtils.compare(buffer, EXIF_CONSTANT)) {
             throw new IllegalArgumentException("File is not in a JPG format!");
         }
         // Endianess
@@ -158,18 +158,6 @@ public class ImageUtils {
             value = ein.readInt();
         }
         return new AbstractMap.SimpleEntry<>(id, value);
-    }
-
-    private static boolean compare(byte[] a1, byte[] a2) {
-        if (a1.length != a2.length) {
-            return false;
-        }
-        for (int i = 0; i < a1.length; i++) {
-            if (a1[i] != a2[i]) {
-                return false;
-            }
-        }
-        return true;
     }
 
 }
