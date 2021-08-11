@@ -187,7 +187,7 @@ public class FileFunctions {
      * </code>
      */
     @JSONFunction
-    private static boolean isDir(String path) {
+    private static Boolean isDir(String path) {
         return new File(path).isDirectory();
     }
 }
