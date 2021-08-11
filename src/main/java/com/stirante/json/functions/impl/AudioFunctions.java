@@ -14,14 +14,16 @@ public class AudioFunctions {
 
     /**
      * Returns duration of audio in seconds from file path in first argument.
+     *
      * Currently, only supports PCM WAV files in RIFF format.
      *
      * @param path path: A path to the audio file
-     * @example <code>
+     * @example
+     * <code>
      * {
-     * "$template": {
-     * "test": "{{audioDuration('resources/sounds/sound.wav')}}"
-     * }
+     *   "$template": {
+     *     "test": "{{audioDuration('resources/sounds/sound.wav')}}"
+     *   }
      * }
      * </code>
      */

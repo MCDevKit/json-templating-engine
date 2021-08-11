@@ -172,4 +172,22 @@ public class FileFunctions {
     private static String filePath(String path) {
         return FilenameUtils.getPath(path);
     }
+
+    /**
+     * Returns whether a file is a directory.
+     * @param path path: A path to the file
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be true",
+     *     "test": "{{isDir('resources/textures/particle/')}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static boolean isDir(String path) {
+        return new File(path).isDirectory();
+    }
 }
