@@ -135,8 +135,8 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                     if (ctx.LessOrEqual() != null) {
                         return n1.doubleValue() <= n2.doubleValue();
                     }
-                    boolean decimal = n1 instanceof Float || n1 instanceof Double || n2 instanceof Float ||
-                            n2 instanceof Double;
+                    boolean decimal = n1 instanceof Float || n1 instanceof Double || n1 instanceof BigDecimal || n2 instanceof Float ||
+                            n2 instanceof Double || n2 instanceof BigDecimal;
                     if (decimal) {
                         if (ctx.Subtract() != null) {
                             return n1.doubleValue() - n2.doubleValue();
