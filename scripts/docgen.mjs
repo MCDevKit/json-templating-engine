@@ -4,11 +4,11 @@ import * as Path from "path";
 
 fs.rmdirSync('dist', {recursive: true});
 
-let files = fs.readdirSync('../src/main/java/com/stirante/json/functions/impl/');
+let files = fs.readdirSync('../src/main/java/com/glowfischdesignstudio/jsonte/functions/impl/');
 
 files.forEach(value => {
     if (!value.endsWith('.java')) return;
-    let content = fs.readFileSync('../src/main/java/com/stirante/json/functions/impl/' + value, 'utf8');
+    let content = fs.readFileSync('../src/main/java/com/glowfischdesignstudio/jsonte/functions/impl/' + value, 'utf8');
     let regex = /\/\*\*([^]*?)\*\/([^{;/]+)/gm;
     let m, declaration, doc;
 
