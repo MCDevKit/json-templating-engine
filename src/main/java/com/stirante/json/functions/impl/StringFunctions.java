@@ -207,4 +207,62 @@ public class StringFunctions {
     private static String capitalize(String str) {
         return str.substring(0, 1).toUpperCase(Locale.ROOT) + str.substring(1).toLowerCase(Locale.ROOT);
     }
+
+    /**
+     * Tests if this string starts with the specified prefix.
+     * @param str string: Text to check
+     * @param prefix string: Prefix
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be true",
+     *     "test": "{{startsWith('testing', 'test'))}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Boolean startsWith(String str, String prefix) {
+        return str.startsWith(prefix);
+    }
+
+    /**
+     * Tests if this string ends with the specified suffix.
+     * @param str string: Text to check
+     * @param suffix string: Suffix
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be true",
+     *     "test": "{{endsWith('testing', 'ing'))}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Boolean endsWith(String str, String suffix) {
+        return str.startsWith(suffix);
+    }
+
+    /**
+     * Replaces each substring of this string that matches the given regular expression with the given replacement.
+     * @param str string: Text to transform
+     * @param regex string: Regular expression
+     * @param replacement string: Replacement
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be player.first_person",
+     *     "test": "{{regexReplace('controller.animation.player.first_person', '(?:controller\.)?(?:animation\.)(.+)', '$1'))}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static String regexReplace(String str, String regex, String replacement) {
+        return str.replaceAll(regex, replacement);
+    }
 }
