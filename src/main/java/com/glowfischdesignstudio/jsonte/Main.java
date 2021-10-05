@@ -22,16 +22,14 @@ public class Main {
             String action = args[0];
             JSONObject scope = new JSONObject();
             File out = null;
+            List<String> input = new ArrayList<>();
             boolean removeSource = false;
             int i = 1;
             for (; i < args.length; i++) {
-                if (!args[i].startsWith("--")) {
-                    break;
-                }
                 if (args[i].equalsIgnoreCase("--remove-src")) {
                     removeSource = true;
                 }
-                else if (args.length > i + 1) {
+                else if (args[i].startsWith("--") && args.length > i + 1) {
                     if (args[i].equalsIgnoreCase("--scope")) {
                         i++;
                         try {
@@ -66,12 +64,16 @@ public class Main {
                             throw new JsonTemplatingException("Output file is not a directory");
                         }
                     }
+                } else {
+                    input.add(args[i]);
                 }
             }
             if (action.equalsIgnoreCase("eval")) {
-                if (args.length > i) {
-                    Object value = JsonProcessor.resolve(args[i], scope, "#/").getValue();
-                    System.out.println(value);
+                if (input.size() > 0) {
+                    for (String s : input) {
+                        Object value = JsonProcessor.resolve(s, scope, "#/").getValue();
+                        System.out.println(value);
+                    }
                 }
                 else {
                     System.out.println("Enter 'exit' to stop the REPL");
@@ -94,12 +96,8 @@ public class Main {
                 }
             }
             else if (action.equalsIgnoreCase("compile")) {
-                if (args.length > i) {
-                    List<File> files = new ArrayList<>();
-                    for (; i < args.length; i++) {
-                        files.add(new File(args[i]));
-                    }
-                    files = files.stream().filter(File::exists).flatMap(FileUtils::expand).collect(Collectors.toList());
+                if (input.size() > 0) {
+                    List<File> files = input.stream().map(File::new).filter(File::exists).flatMap(FileUtils::expand).collect(Collectors.toList());
                     File finalOut = out;
                     files.stream().filter(file -> file.getName().endsWith(".modl")).forEach(file -> {
                         System.out.println("Processing " + file.getName());
