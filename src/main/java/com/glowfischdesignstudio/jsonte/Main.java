@@ -22,12 +22,16 @@ public class Main {
             String action = args[0];
             JSONObject scope = new JSONObject();
             File out = null;
+            boolean removeSource = false;
             int i = 1;
             for (; i < args.length; i++) {
                 if (!args[i].startsWith("--")) {
                     break;
                 }
-                if (args.length > i + 1) {
+                if (args[i].equalsIgnoreCase("--remove-src")) {
+                    removeSource = true;
+                }
+                else if (args.length > i + 1) {
                     if (args[i].equalsIgnoreCase("--scope")) {
                         i++;
                         try {
@@ -98,6 +102,7 @@ public class Main {
                     files = files.stream().filter(File::exists).flatMap(FileUtils::expand).collect(Collectors.toList());
                     File finalOut = out;
                     files.stream().filter(file -> file.getName().endsWith(".modl")).forEach(file -> {
+                        System.out.println("Processing " + file.getName());
                         try {
                             JsonProcessor.processModule(Pipe.from(file).toString(), scope, 0);
                         } catch (IOException e) {
@@ -105,6 +110,7 @@ public class Main {
                         }
                     });
                     files.stream().filter(file -> file.getName().endsWith(".templ")).forEach(file -> {
+                        System.out.println("Compiling " + file.getName());
                         try {
                             String name = file.getName().substring(0, file.getName().lastIndexOf('.'));
                             Pipe.from(file)
@@ -115,8 +121,10 @@ public class Main {
                                             .collect(Collectors.toList()))
                                     .forEach(pipe -> {
                                         if (finalOut != null && finalOut.exists()) {
-                                            RuntimeIOException.wrap(() -> pipe.to(new File(finalOut,
-                                                    pipe.get("name") + ".json")));
+                                            File f = new File(finalOut,
+                                                    file.getParentFile().getPath() + "/" + pipe.get("name") + ".json");
+                                            f.getParentFile().mkdirs();
+                                            RuntimeIOException.wrap(() -> pipe.to(f));
                                         }
                                         else {
                                             System.out.println(pipe.get("name") + ".json" + ":");
@@ -127,6 +135,14 @@ public class Main {
                             throw new JsonTemplatingException("Failed to process file " + file.getName(), e);
                         }
                     });
+                    if (removeSource) {
+                        if (!files.stream()
+                                .filter(file -> file.getName().endsWith(".templ") || file.getName().endsWith(".modl"))
+                                .peek(file -> System.out.println("Removing " + file.getName()))
+                                .allMatch(File::delete)) {
+                            System.out.println("Failed to delete some files");
+                        }
+                    }
                 }
                 else {
                     throw new JsonTemplatingException("No files provided!");
