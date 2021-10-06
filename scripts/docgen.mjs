@@ -70,7 +70,9 @@ has_children: true
         // Prepare file name
         let name = declaration
             .replace(/\s+/gm, ' ')
-            .replace(/@JSONFunction \w+ \w+ \w+ (\w+)\(.*\)/gm, '$1');
+            .replace(/@JSONInstanceFunction /gm, '')
+            .replace(/@JSONFunction /gm, '')
+            .replace(/\w+ \w+ \w+ (\w+)\(.*\)/gm, '$1');
         path += '/' + name + '.md';
         let sections = {
             overview: '',
