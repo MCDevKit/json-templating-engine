@@ -4,6 +4,7 @@ import com.glowfischdesignstudio.jsonte.exception.JsonTemplatingException;
 import com.glowfischdesignstudio.jsonte.functions.FunctionDefinition;
 import com.glowfischdesignstudio.jsonte.functions.JSONFunction;
 import com.glowfischdesignstudio.jsonte.functions.JSONLambda;
+import com.glowfischdesignstudio.jsonte.functions.JSONInstanceFunction;
 import com.glowfischdesignstudio.jsonte.functions.impl.*;
 import com.glowfischdesignstudio.jsonte.utils.JsonUtils;
 import com.stirante.justpipe.Pipe;
@@ -27,6 +28,7 @@ public class JsonProcessor {
     private static final String[] DANGEROUS_FUNCTIONS =
             {"fileList", "fileListRecurse", "imageWidth", "imageHeight", "getMinecraftInstallDir", "audioDuration", "isDir"};
     public static final Map<String, FunctionDefinition> FUNCTIONS = new HashMap<>();
+    public static final Map<Class<?>, Map<String, FunctionDefinition>> INSTANCE_FUNCTIONS = new HashMap<>();
     private static final List<Class<?>> ALLOWED_TYPES = Arrays.asList(
             String.class, Integer.class, Double.class, Float.class, Number.class, Boolean.class, Long.class, JSONArray.class, JSONObject.class, JSONLambda.class, Object.class);
 
@@ -48,6 +50,10 @@ public class JsonProcessor {
 
     public static FunctionDefinition defineFunction(String name) {
         return FUNCTIONS.computeIfAbsent(name, FunctionDefinition::new);
+    }
+
+    public static FunctionDefinition defineInstanceFunction(Class<?> instanceClass, String name) {
+        return INSTANCE_FUNCTIONS.computeIfAbsent(instanceClass, c -> new HashMap<>()).computeIfAbsent(name, FunctionDefinition::new);
     }
 
     public static void disableFunction(String name) {
@@ -455,6 +461,35 @@ public class JsonProcessor {
                     }
                 }
                 defineFunction(name)
+                        .addImplementation(objects -> {
+                            try {
+                                return method.invoke(null, objects);
+                            } catch (IllegalAccessException | InvocationTargetException e) {
+                                e.printStackTrace();
+                                return null;
+                            }
+                        }, types);
+            }
+            if (method.isAnnotationPresent(JSONInstanceFunction.class)) {
+                method.setAccessible(true);
+                String name = method.getName();
+                Class<?>[] types = method.getParameterTypes();
+                if (types.length == 0) {
+                    throw new IllegalStateException("Registered instance function doesn't have an instance parameter!");
+                }
+                Class<?> instanceClass = types[0];
+                Class<?> retType = method.getReturnType();
+                if (!ALLOWED_TYPES.contains(retType)) {
+                    throw new IllegalStateException(
+                            "Registered instance function " + name + " returns unsupported type " + retType);
+                }
+                for (Class<?> type : types) {
+                    if (!ALLOWED_TYPES.contains(type)) {
+                        throw new IllegalStateException(
+                                "Registered instance function " + name + " has unsupported parameter type " + retType);
+                    }
+                }
+                defineInstanceFunction(instanceClass, name)
                         .addImplementation(objects -> {
                             try {
                                 return method.invoke(null, objects);

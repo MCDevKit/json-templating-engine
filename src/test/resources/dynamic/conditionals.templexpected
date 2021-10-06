@@ -55,7 +55,7 @@ File conditionals
         "Some complex math: 24",
         "Dynamic ranges 0",
         "Dynamic ranges 1",
-        "com/stirante/json/JsonProcessorTest.java"
+        "com/glowfischdesignstudio/jsonte/JsonProcessorTest.java"
       ]}},
       "egg:green": {"add": {"component_groups": [
         "egg:green",
@@ -63,7 +63,7 @@ File conditionals
         "Dynamic ranges 0",
         "Dynamic ranges 1",
         "Dynamic ranges 2",
-        "com/stirante/json/JsonProcessorTest.java"
+        "com/glowfischdesignstudio/jsonte/JsonProcessorTest.java"
       ]}},
       "egg:blue": {"add": {"component_groups": [
         "egg:blue",
@@ -74,7 +74,7 @@ File conditionals
         "Dynamic ranges 1",
         "Dynamic ranges 2",
         "Dynamic ranges 3",
-        "com/stirante/json/JsonProcessorTest.java"
+        "com/glowfischdesignstudio/jsonte/JsonProcessorTest.java"
       ]}}
     }
   }

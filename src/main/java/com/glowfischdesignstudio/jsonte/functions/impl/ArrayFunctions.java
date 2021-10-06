@@ -3,6 +3,7 @@ package com.glowfischdesignstudio.jsonte.functions.impl;
 import com.glowfischdesignstudio.jsonte.functions.JSONLambda;
 import com.glowfischdesignstudio.jsonte.exception.JsonTemplatingException;
 import com.glowfischdesignstudio.jsonte.functions.JSONFunction;
+import com.glowfischdesignstudio.jsonte.functions.JSONInstanceFunction;
 import com.glowfischdesignstudio.jsonte.utils.JsonUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -147,6 +148,7 @@ public class ArrayFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static JSONArray reverse(JSONArray arr) {
         List<?> l = new ArrayList<>(arr.toList());
         Collections.reverse(l);
@@ -168,11 +170,13 @@ public class ArrayFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static Boolean contains(JSONArray arr, String value) {
         return arr.toList().stream().anyMatch(o -> o instanceof String && o.equals(value));
     }
 
     @JSONFunction
+    @JSONInstanceFunction
     private static Boolean contains(JSONArray arr, Number value) {
         return arr.toList()
                 .stream()
@@ -194,6 +198,7 @@ public class ArrayFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static JSONArray filter(JSONArray arr, JSONLambda predicate) {
         List<Object> objects = arr.toList();
         for (int i = objects.size() - 1; i >= 0; i--) {
@@ -219,6 +224,7 @@ public class ArrayFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static JSONArray map(JSONArray arr, JSONLambda predicate) {
         List<Object> objects = arr.toList();
         for (int i = 0; i < objects.size(); i++) {
@@ -242,6 +248,7 @@ public class ArrayFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static JSONArray flatMap(JSONArray arr, JSONLambda predicate) {
         List<Object> objects = arr.toList();
         for (int i = 0; i < objects.size(); i++) {
@@ -255,6 +262,7 @@ public class ArrayFunctions {
     }
 
     @JSONFunction
+    @JSONInstanceFunction
     private static JSONArray flatMap(JSONArray arr) {
         return new JSONArray(arr.toList()
                 .stream()
@@ -278,6 +286,7 @@ public class ArrayFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static Long count(JSONArray arr, JSONLambda predicate) {
         List<Object> objects = arr.toList();
         for (int i = objects.size() - 1; i >= 0; i--) {
@@ -289,9 +298,11 @@ public class ArrayFunctions {
     }
 
     @JSONFunction
+    @JSONInstanceFunction
     private static Integer count(JSONArray arr) {
         return arr.toList().size();
     }
+
 
     /**
      * Returns the first element from an array filtered by the predicate.
@@ -308,6 +319,7 @@ public class ArrayFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static Object findFirst(JSONArray arr, JSONLambda predicate) {
         List<Object> objects = arr.toList();
         for (int i = objects.size() - 1; i >= 0; i--) {

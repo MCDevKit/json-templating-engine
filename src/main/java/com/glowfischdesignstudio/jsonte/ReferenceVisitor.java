@@ -2,6 +2,7 @@ package com.glowfischdesignstudio.jsonte;
 
 import com.glowfischdesignstudio.jsonte.exception.JsonTemplatingException;
 import com.glowfischdesignstudio.jsonte.functions.JSONLambda;
+import com.glowfischdesignstudio.jsonte.utils.ArrayUtils;
 import com.glowfischdesignstudio.jsonte.utils.JsonUtils;
 import com.glowfischdesignstudio.jsonte.utils.StringUtils;
 import org.json.JSONArray;
@@ -9,6 +10,7 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.BiFunction;
 
 class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     private final JSONObject extraScope;
@@ -224,8 +226,20 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
         if (context.False() != null) {
             return false;
         }
-        if (context.LeftParen() != null && context.field() != null) {
-            Object lambda = visit(context.field());
+        else if (context.Range() != null) {
+            JSONArray arr = new JSONArray();
+            int from = Integer.parseInt(String.valueOf(visit(context.field(0))));
+            int to = Integer.parseInt(String.valueOf(visit(context.field(1))));
+            if (from > to) {
+                return arr;
+            }
+            for (int i = from; i <= to; i++) {
+                arr.put(i);
+            }
+            return arr;
+        }
+        if (context.LeftParen() != null && context.field().size() == 1) {
+            Object lambda = visit(context.field(0));
             Object[] params = context.function_param().stream().map(this::visit).toArray();
             if (lambda instanceof String) {
                 JsonTemplateParser.LambdaContext lambdaContext = JsonProcessor.resolveLambdaTree((String) lambda, path);
@@ -234,20 +248,24 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                     return ((JSONLambda) func).apply(params);
                 }
                 else {
-                    throw new JsonTemplatingException("Function '" + context.field().getText() + "' not found!", path);
+                    throw new JsonTemplatingException("Function '" + context.field(0).getText() + "' not found!", path);
                 }
             }
+            else if (lambda instanceof BiFunction) {
+                //noinspection unchecked
+                return ((BiFunction<Object[], String, Object>) lambda).apply(params, path);
+            }
             else {
-                String methodName = context.field().name().getText();
+                String methodName = context.field(0).name().getText();
                 if (!JsonProcessor.FUNCTIONS.containsKey(methodName)) {
                     throw new JsonTemplatingException("Function '" + methodName + "' not found!", path);
                 }
                 return JsonProcessor.FUNCTIONS.get(methodName).execute(params, path);
             }
         }
-        if (context.name() != null && context.field() != null) {
+        if (context.name() != null && context.field().size() == 1) {
             String text = context.name().getText();
-            Object object = visit(context.field());
+            Object object = visit(context.field(0));
             Object newScope = null;
             if (object instanceof JSONObject && ((JSONObject) object).has(text)) {
                 newScope = ((JSONObject) object).get(text);
@@ -258,10 +276,25 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             }
             else {
                 if (object instanceof JSONArray || object instanceof List) {
+                    if (JsonProcessor.INSTANCE_FUNCTIONS.containsKey(JSONArray.class) && JsonProcessor.INSTANCE_FUNCTIONS.get(JSONArray.class).containsKey(text)) {
+                        if (object instanceof List) {
+                            object = new JSONArray((List<?>)object);
+                        }
+                        Object finalObject = object;
+                        return (BiFunction<Object[], String, Object>) (params, path) -> JsonProcessor.INSTANCE_FUNCTIONS.get(JSONArray.class).get(text).execute(
+                                ArrayUtils.prepend(finalObject, params), path
+                        );
+                    }
                     throw new JsonTemplatingException("Trying to access field from an array", path);
                 }
 
                 if (object instanceof String) {
+                    if (JsonProcessor.INSTANCE_FUNCTIONS.containsKey(String.class) && JsonProcessor.INSTANCE_FUNCTIONS.get(String.class).containsKey(text)) {
+                        Object finalObject = object;
+                        return (BiFunction<Object[], String, Object>) (params, path) -> JsonProcessor.INSTANCE_FUNCTIONS.get(String.class).get(text).execute(
+                                ArrayUtils.prepend(finalObject, params), path
+                        );
+                    }
                     throw new JsonTemplatingException("Trying to access field from a string", path);
                 }
 
@@ -281,9 +314,9 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
         if (context.name() != null) {
             return visit(context.name());
         }
-        if (context.index() != null && context.field() != null) {
+        if (context.index() != null && context.field().size() == 1) {
             Object i = visit(context.index());
-            Object object = visit(context.field());
+            Object object = visit(context.field(0));
             if (object instanceof JSONArray) {
                 JSONArray arr = (JSONArray) object;
                 if (!(i instanceof Number)) {

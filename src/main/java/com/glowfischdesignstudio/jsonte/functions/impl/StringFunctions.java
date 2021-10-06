@@ -1,6 +1,7 @@
 package com.glowfischdesignstudio.jsonte.functions.impl;
 
 import com.glowfischdesignstudio.jsonte.functions.JSONFunction;
+import com.glowfischdesignstudio.jsonte.functions.JSONInstanceFunction;
 import org.json.JSONArray;
 
 import java.util.Arrays;
@@ -29,6 +30,7 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static String replace(String str, String toReplace, String replacement) {
         return str.replace(toReplace, replacement);
     }
@@ -48,6 +50,7 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static String join(JSONArray arr, String delimiter) {
         return StreamSupport.stream(arr.spliterator(), false)
                 .map(Object::toString)
@@ -69,6 +72,7 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static Boolean contains(String str, String toFind) {
         return str.contains(toFind);
     }
@@ -88,6 +92,7 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static JSONArray split(String str, String delimiter) {
         return new JSONArray(Arrays.asList(str.split(delimiter)));
     }
@@ -107,6 +112,7 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static Integer indexOf(String str, String toFind) {
         return str.indexOf(toFind);
     }
@@ -125,6 +131,7 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static Integer hash(String str) {
         return str.hashCode() % Integer.MAX_VALUE;
     }
@@ -143,6 +150,7 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static String toUpperCase(String str) {
         return str.toUpperCase(Locale.ROOT);
     }
@@ -161,6 +169,7 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static String toLowerCase(String str) {
         return str.toLowerCase(Locale.ROOT);
     }
@@ -181,11 +190,13 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static String substring(String str, Number start, Number end) {
         return str.substring(start.intValue(), end.intValue());
     }
 
     @JSONFunction
+    @JSONInstanceFunction
     private static String substring(String str, Number start) {
         return str.substring(start.intValue());
     }
@@ -204,6 +215,7 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static String capitalize(String str) {
         return str.substring(0, 1).toUpperCase(Locale.ROOT) + str.substring(1).toLowerCase(Locale.ROOT);
     }
@@ -223,6 +235,7 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static Boolean startsWith(String str, String prefix) {
         return str.startsWith(prefix);
     }
@@ -242,6 +255,7 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static Boolean endsWith(String str, String suffix) {
         return str.startsWith(suffix);
     }
@@ -262,6 +276,7 @@ public class StringFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONInstanceFunction
     private static String regexReplace(String str, String regex, String replacement) {
         return str.replaceAll(regex, replacement);
     }

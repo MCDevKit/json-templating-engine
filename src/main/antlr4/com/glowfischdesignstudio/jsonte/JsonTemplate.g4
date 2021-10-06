@@ -80,6 +80,7 @@ field
    | Null
    | field (LeftBracket index RightBracket)
    | field LeftParen (function_param (Comma function_param)*)? RightParen
+   | field Range field
    | field ('.' name)
    | name
    | array
