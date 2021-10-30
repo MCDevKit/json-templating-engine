@@ -86,6 +86,7 @@ field
    | array
    | NUMBER
    | ESCAPED_STRING
+   | LeftParen field RightParen
    ;
 
 array

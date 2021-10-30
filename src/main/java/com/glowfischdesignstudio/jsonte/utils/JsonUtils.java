@@ -9,6 +9,10 @@ import java.util.function.Consumer;
 
 public class JsonUtils {
 
+    /**
+     * Removes all fields with null values.
+     * @param obj The object to remove nulls from.
+     */
     public static void removeNulls(JSONObject obj) {
         List<String> keys = new ArrayList<>(obj.keySet());
         for (String s : keys) {
@@ -17,6 +21,10 @@ public class JsonUtils {
         }
     }
 
+    /**
+     * Removes all elements with null values.
+     * @param arr The array to remove nulls from.
+     */
     public static void removeNulls(JSONArray arr) {
         for (int i = arr.length() - 1; i >= 0; i--) {
             Object o = arr.get(i);
@@ -36,6 +44,12 @@ public class JsonUtils {
         }
     }
 
+    /**
+     * Merges fields from parent to template.
+     * @param template The template object.
+     * @param parent The parent object.
+     * @return merged object.
+     */
     public static JSONObject merge(JSONObject template, JSONObject parent) {
         if (template == parent) {
             throw new IllegalArgumentException("Template and parent cannot be the same!");
@@ -82,6 +96,12 @@ public class JsonUtils {
         return template;
     }
 
+    /**
+     * Merges fields from parent to template.
+     * @param template The template array.
+     * @param parent The parent array.
+     * @return merged object.
+     */
     public static JSONArray merge(JSONArray template, JSONArray parent) {
         if (template == parent) {
             throw new IllegalArgumentException("Template and parent cannot be the same!");
@@ -100,10 +120,18 @@ public class JsonUtils {
         return template;
     }
 
-    public static JSONObject createIterationExtraScope(JSONObject extraScope, JSONArray arr1, int i1, String name) {
+    /**
+     * Creates a scope for iteration.
+     * @param extraScope The extra scope to add.
+     * @param arr The array to iterate over.
+     * @param index The index of the array.
+     * @param name The variable name containing current element.
+     * @return The scope.
+     */
+    public static JSONObject createIterationExtraScope(JSONObject extraScope, JSONArray arr, int index, String name) {
         JSONObject extra = new JSONObject();
-        extra.put("index", i1);
-        extra.put(name, arr1.get(i1));
+        extra.put("index", index);
+        extra.put(name, arr.get(index));
         for (String s1 : extraScope.keySet()) {
             if (!extra.has(s1)) {
                 extra.put(s1, extraScope.get(s1));
@@ -112,6 +140,19 @@ public class JsonUtils {
         return extra;
     }
 
+    /**
+     * Tries to make a boolean out of an object.
+     *
+     * Following values will result in false:
+     * <ul>
+     *     <li>null</li>
+     *     <li>0</li>
+     *     <li>""</li>
+     *     <li>false</li>
+     * </ul>
+     * @param o The object.
+     * @return The boolean.
+     */
     public static boolean toBoolean(Object o) {
         return o != null && (o instanceof JSONObject ||
                 o instanceof JSONArray ||
@@ -120,6 +161,11 @@ public class JsonUtils {
                 (o instanceof String && !((String) o).isEmpty()));
     }
 
+    /**
+     * Tries to make a number out of an object.
+     * @param o The object.
+     * @return The number.
+     */
     public static Number toNumber(Object o) {
         if (o instanceof Number) {
             return (Number) o;

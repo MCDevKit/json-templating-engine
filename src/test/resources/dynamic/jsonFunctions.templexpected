@@ -92,6 +92,8 @@ File jsonFunctions
       "entityComponentGroups.templexpected",
       "jsonFunctions.templ",
       "jsonFunctions.templexpected",
+      "nested.templ",
+      "nested.templexpected",
       "order.templ",
       "order.templexpected"
     ],
@@ -100,6 +102,7 @@ File jsonFunctions
       "differentEntities.templ",
       "entityComponentGroups.templ",
       "jsonFunctions.templ",
+      "nested.templ",
       "order.templ"
     ]
   }
