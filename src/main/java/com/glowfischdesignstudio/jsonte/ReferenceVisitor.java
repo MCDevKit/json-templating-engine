@@ -70,9 +70,6 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             if (ctx.Not() != null) {
                 return !JsonUtils.toBoolean(f1);
             }
-            else if (ctx.Subtract() != null) {
-                return negate(f1);
-            }
             return f1;
         }
         else if (ctx.reference().size() == 2) {
@@ -111,10 +108,10 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             else if (ctx.NotEqual() != null) {
                 return !Objects.equals(f1, f2);
             }
-            else if (ctx.Range() != null) {
+            else if (ctx.Range() != null && n1 != null && n2 != null) {
                 JSONArray arr = new JSONArray();
-                int from = Integer.parseInt(String.valueOf(visit(ctx.reference(0))));
-                int to = Integer.parseInt(String.valueOf(visit(ctx.reference(1))));
+                int from = n1.intValue();
+                int to = n2.intValue();
                 if (from > to) {
                     return arr;
                 }
@@ -238,7 +235,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             }
             return arr;
         }
-        if (context.LeftParen() != null && context.field().size() == 1) {
+        if (context.LeftParen() != null && context.field().size() == 1 && context.children.indexOf(context.field(0)) == 0) {
             Object lambda = visit(context.field(0));
             Object[] params = context.function_param().stream().map(this::visit).toArray();
             if (lambda instanceof String) {
@@ -262,6 +259,8 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                 }
                 return JsonProcessor.FUNCTIONS.get(methodName).execute(params, path);
             }
+        } else if (context.LeftParen() != null && context.field().size() == 1 && context.children.indexOf(context.field(0)) != 0) {
+            return visit(context.field(0));
         }
         if (context.name() != null && context.field().size() == 1) {
             String text = context.name().getText();
@@ -369,6 +368,9 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
         }
         if (context.array() != null) {
             return visit(context.array());
+        }
+        if (context.Subtract() != null && context.field().size() == 1) {
+            return negate(visit(context.field(0)));
         }
         return null;
     }

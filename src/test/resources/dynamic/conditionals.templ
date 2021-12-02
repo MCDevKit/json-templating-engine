@@ -112,6 +112,9 @@
                   "{{#(-index)..(index + 1) as num}}": "{{'Dynamic ranges ' + num}}"
                 },
                 {
+                  "{{#-9..9 as num}}": "{{'Negative start range ' + num}}"
+                },
+                {
                   "{{#fileListRecurse('src/test/java/')}}": "{{value}}"
                 }
                 //Testing for comments
