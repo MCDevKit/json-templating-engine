@@ -47,9 +47,6 @@ action
 
 reference
    : field
-   | reference Range reference
-   | reference (Divide | Multiply) reference
-   | reference (Add | Subtract) reference
    | reference Equal reference
    | reference Less reference
    | reference LessOrEqual reference
@@ -78,6 +75,8 @@ field
    | False
    | Null
    | Subtract field
+   | field (Divide | Multiply) field
+   | field (Add | Subtract) field
    | field (LeftBracket index RightBracket)
    | field LeftParen (function_param (Comma function_param)*)? RightParen
    | field Range field

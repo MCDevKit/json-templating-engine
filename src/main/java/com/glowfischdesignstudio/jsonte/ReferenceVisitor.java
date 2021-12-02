@@ -86,20 +86,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             Object f2 = visit(ctx.reference(1));
             Number n1 = JsonUtils.toNumber(f1);
             Number n2 = JsonUtils.toNumber(f2);
-            if (ctx.Add() != null) {
-                if (f1 instanceof Number && f2 instanceof Number) {
-                    boolean decimal = f1 instanceof Float || f1 instanceof Double || f2 instanceof Float ||
-                            f2 instanceof Double;
-                    if (decimal) {
-                        return ((Number) f1).doubleValue() + ((Number) f2).doubleValue();
-                    }
-                    return ((Number) f1).intValue() + ((Number) f2).intValue();
-                }
-                else {
-                    return f1.toString() + f2.toString();
-                }
-            }
-            else if (ctx.Equal() != null) {
+            if (ctx.Equal() != null) {
                 if (f1 instanceof Number && f2 instanceof Number) {
                     return ((Number) f1).doubleValue() == ((Number) f2).doubleValue();
                 }
@@ -107,18 +94,6 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             }
             else if (ctx.NotEqual() != null) {
                 return !Objects.equals(f1, f2);
-            }
-            else if (ctx.Range() != null && n1 != null && n2 != null) {
-                JSONArray arr = new JSONArray();
-                int from = n1.intValue();
-                int to = n2.intValue();
-                if (from > to) {
-                    return arr;
-                }
-                for (int i = from; i <= to; i++) {
-                    arr.put(i);
-                }
-                return arr;
             }
             else {
                 if (n1 != null && n2 != null) {
@@ -133,30 +108,6 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                     }
                     if (ctx.LessOrEqual() != null) {
                         return n1.doubleValue() <= n2.doubleValue();
-                    }
-                    boolean decimal = n1 instanceof Float || n1 instanceof Double || n1 instanceof BigDecimal || n2 instanceof Float ||
-                            n2 instanceof Double || n2 instanceof BigDecimal;
-                    if (decimal) {
-                        if (ctx.Subtract() != null) {
-                            return n1.doubleValue() - n2.doubleValue();
-                        }
-                        if (ctx.Divide() != null) {
-                            return n1.doubleValue() / n2.doubleValue();
-                        }
-                        if (ctx.Multiply() != null) {
-                            return n1.doubleValue() * n2.doubleValue();
-                        }
-                    }
-                    else {
-                        if (ctx.Subtract() != null) {
-                            return n1.intValue() - n2.intValue();
-                        }
-                        if (ctx.Divide() != null) {
-                            return n1.intValue() / n2.intValue();
-                        }
-                        if (ctx.Multiply() != null) {
-                            return n1.intValue() * n2.intValue();
-                        }
                     }
                 }
                 else if (ctx.Greater() != null || ctx.Less() != null || ctx.GreaterOrEqual() != null ||
@@ -223,17 +174,61 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
         if (context.False() != null) {
             return false;
         }
-        else if (context.Range() != null) {
-            JSONArray arr = new JSONArray();
-            int from = Integer.parseInt(String.valueOf(visit(context.field(0))));
-            int to = Integer.parseInt(String.valueOf(visit(context.field(1))));
-            if (from > to) {
-                return arr;
+        if (context.field().size() == 2) {
+            Object f1 = visit(context.field(0));
+            Object f2 = visit(context.field(1));
+            Number n1 = JsonUtils.toNumber(f1);
+            Number n2 = JsonUtils.toNumber(f2);
+            if (context.Add() != null) {
+                if (f1 instanceof Number && f2 instanceof Number) {
+                    boolean decimal = f1 instanceof Float || f1 instanceof Double || f2 instanceof Float ||
+                            f2 instanceof Double;
+                    if (decimal) {
+                        return ((Number) f1).doubleValue() + ((Number) f2).doubleValue();
+                    }
+                    return ((Number) f1).intValue() + ((Number) f2).intValue();
+                }
+                else {
+                    return f1.toString() + f2.toString();
+                }
+            } else if (n1 != null && n2 != null) {
+                if (context.Range() != null) {
+                    JSONArray arr = new JSONArray();
+                    int from = n1.intValue();
+                    int to = n2.intValue();
+                    if (from > to) {
+                        return arr;
+                    }
+                    for (int i = from; i <= to; i++) {
+                        arr.put(i);
+                    }
+                    return arr;
+                }
+                boolean decimal = n1 instanceof Float || n1 instanceof Double || n1 instanceof BigDecimal || n2 instanceof Float ||
+                        n2 instanceof Double || n2 instanceof BigDecimal;
+                if (decimal) {
+                    if (context.Subtract() != null) {
+                        return n1.doubleValue() - n2.doubleValue();
+                    }
+                    if (context.Divide() != null) {
+                        return n1.doubleValue() / n2.doubleValue();
+                    }
+                    if (context.Multiply() != null) {
+                        return n1.doubleValue() * n2.doubleValue();
+                    }
+                }
+                else {
+                    if (context.Subtract() != null) {
+                        return n1.intValue() - n2.intValue();
+                    }
+                    if (context.Divide() != null) {
+                        return n1.intValue() / n2.intValue();
+                    }
+                    if (context.Multiply() != null) {
+                        return n1.intValue() * n2.intValue();
+                    }
+                }
             }
-            for (int i = from; i <= to; i++) {
-                arr.put(i);
-            }
-            return arr;
         }
         if (context.LeftParen() != null && context.field().size() == 1 && context.children.indexOf(context.field(0)) == 0) {
             Object lambda = visit(context.field(0));
