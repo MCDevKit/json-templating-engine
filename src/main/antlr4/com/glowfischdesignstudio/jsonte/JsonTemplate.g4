@@ -74,8 +74,8 @@ field
    : True
    | False
    | Null
-   | Subtract field
    | field LeftParen (function_param (Comma function_param)*)? RightParen
+   | Subtract field
    | field (Divide | Multiply) field
    | field (Add | Subtract) field
    | field (LeftBracket index RightBracket)
