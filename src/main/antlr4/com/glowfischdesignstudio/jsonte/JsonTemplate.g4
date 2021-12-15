@@ -75,10 +75,10 @@ field
    | False
    | Null
    | Subtract field
+   | field LeftParen (function_param (Comma function_param)*)? RightParen
    | field (Divide | Multiply) field
    | field (Add | Subtract) field
    | field (LeftBracket index RightBracket)
-   | field LeftParen (function_param (Comma function_param)*)? RightParen
    | field Range field
    | field ('.' name)
    | name
