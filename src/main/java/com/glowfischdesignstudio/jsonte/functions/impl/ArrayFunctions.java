@@ -8,10 +8,7 @@ import com.glowfischdesignstudio.jsonte.utils.JsonUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -348,8 +345,19 @@ public class ArrayFunctions {
     @JSONFunction
     @JSONInstanceFunction
     private static Object indexOf(JSONArray arr, Object element) {
+        if (element instanceof Iterable) {
+            element = new JSONArray((Iterable<?>) element);
+        }
+        else if (element instanceof Map) {
+            element = new JSONObject((Map<?, ?>) element);
+        }
         List<Object> objects = arr.toList();
-        return objects.indexOf(element);
+        return objects.stream()
+                .map(o -> o instanceof Map ? new JSONObject((Map<?, ?>) o) : o)
+                .map(o -> o instanceof Iterable ? new JSONArray((Iterable<?>) o) : o)
+                .map(Object::toString)
+                .collect(Collectors.toList())
+                .indexOf(element.toString());
     }
 
 
