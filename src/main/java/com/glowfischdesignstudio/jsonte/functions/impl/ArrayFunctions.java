@@ -330,4 +330,26 @@ public class ArrayFunctions {
         throw new JsonTemplatingException("No matching items found!");
     }
 
+
+    /**
+     * Returns index of given element inside the array or -1 if not found.
+     * @param arr array: Source array
+     * @param element element: Element to find
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 1",
+     *     "test": "{{indexOf(1..5, 2)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    @JSONInstanceFunction
+    private static Object indexOf(JSONArray arr, Object element) {
+        List<Object> objects = arr.toList();
+        return objects.indexOf(element);
+    }
+
 }
