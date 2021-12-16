@@ -71,21 +71,21 @@ function_param
     ;
 
 field
-   : True
+   : LeftParen field RightParen
+   | True
    | False
    | Null
+   | NUMBER
+   | ESCAPED_STRING
+   | array
+   | name
+   | field ('.' name)
+   | field (LeftBracket index RightBracket)
    | field LeftParen (function_param (Comma function_param)*)? RightParen
    | Subtract field
    | field (Divide | Multiply) field
    | field (Add | Subtract) field
-   | field (LeftBracket index RightBracket)
    | field Range field
-   | field ('.' name)
-   | name
-   | array
-   | NUMBER
-   | ESCAPED_STRING
-   | LeftParen field RightParen
    ;
 
 array
