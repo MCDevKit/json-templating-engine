@@ -187,4 +187,79 @@ public class MathFunctions {
         return new JSONArray(Arrays.asList(x, y, z));
     }
 
+    /**
+     * Performs bitwise AND operation on two numbers.
+     * @param a a: First number
+     * @param b b: Second number
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 1",
+     *     "test": "{{bitwiseAnd(5, 3)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Number bitwiseAnd(Number a, Number b) {
+        return a.intValue() & b.intValue();
+    }
+
+    /**
+     * Performs bitwise OR operation on two numbers.
+     * @param a a: First number
+     * @param b b: Second number
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 7",
+     *     "test": "{{bitwiseOr(5, 3)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Number bitwiseOr(Number a, Number b) {
+        return a.intValue() | b.intValue();
+    }
+
+    /**
+     * Performs bitwise XOR (exclusive OR) operation on two numbers.
+     * @param a a: First number
+     * @param b b: Second number
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 6",
+     *     "test": "{{bitwiseXor(5, 3)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Number bitwiseXor(Number a, Number b) {
+        return a.intValue() ^ b.intValue();
+    }
+
+    /**
+     * Performs bitwise NOT operation on a number.
+     * @param a a: A number
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be -6",
+     *     "test": "{{bitwiseNot(5)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Number bitwiseNot(Number a) {
+        return ~a.intValue();
+    }
+
 }
