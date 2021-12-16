@@ -352,4 +352,43 @@ public class ArrayFunctions {
         return objects.indexOf(element);
     }
 
+
+    /**
+     * Returns a number with numbers encoded in given bit space.
+     *
+     * @param arr array: Source array
+     * @param space space: Bit space for the values. Must be power of 2.
+     * @param predicate predicate(element, index): Lambda, that should return an integer number to encode
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be -2023406815 (1000 0111 0110 0101 0100 0011 0010 0001)",
+     *     "test": "{{1..10.encode(16, x => x)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    @JSONInstanceFunction
+    private static Number encode(JSONArray arr, Number space, JSONLambda predicate) {
+        if (space.intValue() <= 0 || (space.intValue() & (space.intValue() - 1)) != 0) {
+            throw new JsonTemplatingException("Space must be a power of 2 and greater than 0!");
+        }
+        List<Object> objects = arr.toList();
+        int result = 0;
+        int bitsPerElement = (int) (Math.log(space.intValue()) / Math.log(2));
+        for (int i = 0; i < Math.min(objects.size(), 32 / bitsPerElement); i++) {
+            Number number = JsonUtils.toNumber(predicate.execute(objects.get(i), i));
+            if (number == null) {
+                throw new JsonTemplatingException("Predicate must return a number!");
+            }
+            if (number.intValue() < 0 || number.intValue() >= space.intValue()) {
+                throw new JsonTemplatingException("Number " + number + " is out of range 0.." + (space.intValue() - 1));
+            }
+            result += number.intValue() << i * bitsPerElement;
+        }
+        return result;
+    }
+
 }
