@@ -391,4 +391,44 @@ public class ArrayFunctions {
         return result;
     }
 
+
+    /**
+     * Returns a portion of the array between the specified startIndex, inclusive, and endIndex, exclusive. (If startIndex and endIndex are equal, the returned array is empty.)
+     *
+     * @param arr array: Source array
+     * @param startIndex startIndex: Starting index (inclusive) of the sub list
+     * @param endIndex endIndex: Ending index (exclusive) of the sub list. If none provided, will use the end of the array
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be [4, 5, 6, 7]",
+     *     "test": "{{0..10.sublist(4, 8)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    @JSONInstanceFunction
+    private static JSONArray sublist(JSONArray arr, Number startIndex, Number endIndex) {
+        List<Object> objects = arr.toList();
+        if (startIndex.intValue() < 0 || startIndex.intValue() >= objects.size()) {
+            throw new JsonTemplatingException("Start index " + startIndex + " is out of range 0.." + (objects.size() - 1));
+        }
+        if (endIndex.intValue() < startIndex.intValue() || endIndex.intValue() >= objects.size()) {
+            throw new JsonTemplatingException("End index " + endIndex + " is out of range startIndex.." + (objects.size() - 1));
+        }
+        return new JSONArray(objects.subList(startIndex.intValue(), endIndex.intValue()));
+    }
+
+    @JSONFunction
+    @JSONInstanceFunction
+    private static JSONArray sublist(JSONArray arr, Number startIndex) {
+        List<Object> objects = arr.toList();
+        if (startIndex.intValue() < 0 || startIndex.intValue() >= objects.size()) {
+            throw new JsonTemplatingException("Start index " + startIndex + " is out of range 0.." + (objects.size() - 1));
+        }
+        return new JSONArray(objects.subList(startIndex.intValue(), objects.size()));
+    }
+
 }
