@@ -439,4 +439,94 @@ public class ArrayFunctions {
         return new JSONArray(objects.subList(startIndex.intValue(), objects.size()));
     }
 
+
+    /**
+     * Returns the element, for which the predicate will return the maximum value or null if the array is empty.
+     * @param arr array: Source array
+     * @param predicate predicate(element, index): Lambda, that should return a number to compare. If none provided, it will use identity lambda (`x => x`)
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 4",
+     *     "test": "{{max(0..4)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    @JSONInstanceFunction
+    private static Object max(JSONArray arr, JSONLambda predicate) {
+        List<Object> objects = arr.toList();
+        return objects.stream()
+                .max(Comparator.comparingDouble(args -> {
+                    Number number = JsonUtils.toNumber(predicate.execute(args));
+                    if (number == null) {
+                        throw new JsonTemplatingException("Predicate must return a number!");
+                    }
+                    return number.doubleValue();
+                }))
+                .orElse(null);
+    }
+
+    @JSONFunction
+    @JSONInstanceFunction
+    private static Object max(JSONArray arr) {
+        List<Object> objects = arr.toList();
+        return objects.stream()
+                .max(Comparator.comparingDouble(args -> {
+                    Number number = JsonUtils.toNumber(args);
+                    if (number == null) {
+                        throw new JsonTemplatingException("Object must be a number!");
+                    }
+                    return number.doubleValue();
+                }))
+                .orElse(null);
+    }
+
+
+    /**
+     * Returns the element, for which the predicate will return the minimum value or null if the array is empty.
+     * @param arr array: Source array
+     * @param predicate predicate(element, index): Lambda, that should return a number to compare. If none provided, it will use identity lambda (`x => x`)
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 0",
+     *     "test": "{{min(0..4)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    @JSONInstanceFunction
+    private static Object min(JSONArray arr, JSONLambda predicate) {
+        List<Object> objects = arr.toList();
+        return objects.stream()
+                .min(Comparator.comparingDouble(args -> {
+                    Number number = JsonUtils.toNumber(predicate.execute(args));
+                    if (number == null) {
+                        throw new JsonTemplatingException("Predicate must return a number!");
+                    }
+                    return number.doubleValue();
+                }))
+                .orElse(null);
+    }
+
+    @JSONFunction
+    @JSONInstanceFunction
+    private static Object min(JSONArray arr) {
+        List<Object> objects = arr.toList();
+        return objects.stream()
+                .min(Comparator.comparingDouble(args -> {
+                    Number number = JsonUtils.toNumber(args);
+                    if (number == null) {
+                        throw new JsonTemplatingException("Object must be a number!");
+                    }
+                    return number.doubleValue();
+                }))
+                .orElse(null);
+    }
+
 }
