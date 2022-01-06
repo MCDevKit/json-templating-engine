@@ -1,0 +1,58 @@
+@@ -3,4 +3,5 @@
+/.idea/
+dependency-reduced-pom.xml
+*.iml
+/scripts/dist 
+/scripts/dist
+*.sh 
+  9  src/main/antlr4/com/stirante/json/JsonTemplate.g4 
+@@ -34,6 +34,10 @@ Arrow: '=>';
+LeftMustache: '{{';
+RightMustache: '}}';
+
+Null: 'null';
+False: 'false';
+True: 'true';
+
+action
+    : LeftMustache? Iteration reference (As name)? RightMustache?
+    | LeftMustache? Predicate reference RightMustache?
+@@ -74,7 +78,10 @@ function_param
+    ;
+
+field
+   : field (LeftBracket index RightBracket)
+   : True
+   | False
+   | Null
+   | field (LeftBracket index RightBracket)
+   | field ('.' name)
+   | name
+   | array
+  12  src/main/java/com/stirante/json/ReferenceVisitor.java 
+@@ -188,9 +188,6 @@ else if (context.reference() != null) {
+    @Override
+    public Object visitName(JsonTemplateParser.NameContext context) {
+        String text = context.getText();
+        if (text.equals("null")) {
+            return null;
+        }
+        if (text.equals("this")) {
+            return currentScope;
+        }
+@@ -213,6 +210,15 @@ public Object visitName(JsonTemplateParser.NameContext context) {
+
+    @Override
+    public Object visitField(JsonTemplateParser.FieldContext context) {
+        if (context.Null() != null) {
+            return null;
+        }
+        if (context.True() != null) {
+            return true;
+        }
+        if (context.False() != null) {
+            return false;
+        }
+        if (context.function() != null) {
+            return visit(context.function());
+        }
