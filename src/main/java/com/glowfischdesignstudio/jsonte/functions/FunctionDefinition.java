@@ -125,11 +125,8 @@ public class FunctionDefinition {
             else if (cls == JSONLambda.class) {
                 return (T) JSONLambda.identity();
             }
-            throw new IllegalArgumentException("Unexpected type: " + cls.getName());
         }
-        else {
-            return (T) param;
-        }
+        return (T) param;
     }
 
     private boolean paramCheck(Object[] params, Class<?>[] types) {
