@@ -10,6 +10,7 @@ import com.glowfischdesignstudio.jsonte.utils.JsonUtils;
 import com.stirante.justpipe.Pipe;
 import org.antlr.v4.runtime.*;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -140,7 +141,12 @@ public class JsonProcessor {
         }
         // Parse the input
         Map<String, String> result = new HashMap<>();
-        JSONObject root = new JSONObject(input);
+        JSONObject root;
+        try {
+            root = new JSONObject(input);
+        } catch (JSONException e) {
+            throw new JsonTemplatingException("Could not parse the " + name + " template!", e);
+        }
 
         // Define scope
         JSONObject scope = (JSONObject) JsonUtils.copyJson(globalScope);
