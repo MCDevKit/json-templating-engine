@@ -345,21 +345,18 @@ public class ArrayFunctions {
     @JSONFunction
     @JSONInstanceFunction
     private static Object indexOf(JSONArray arr, Object element) {
-        if (element instanceof Iterable) {
-            element = new JSONArray((Iterable<?>) element);
+        if (element instanceof JSONArray) {
+            element = ((JSONArray) element).toList();
         }
-        else if (element instanceof Map) {
-            element = new JSONObject((Map<?, ?>) element);
+        else if (element instanceof JSONObject) {
+            element = ((JSONObject) element).toMap();
         }
         List<Object> objects = arr.toList();
         return objects.stream()
-                // If it's JSONObject, we need to convert it to Map, so the order of the keys matches
                 .map(o -> o instanceof JSONObject ? ((JSONObject) o).toMap() : o)
-                .map(o -> o instanceof Map ? new JSONObject((Map<?, ?>) o) : o)
-                .map(o -> o instanceof Iterable ? new JSONArray((Iterable<?>) o) : o)
-                .map(Object::toString)
+                .map(o -> o instanceof JSONArray ? ((JSONArray) o).toList() : o)
                 .collect(Collectors.toList())
-                .indexOf(element.toString());
+                .indexOf(element);
     }
 
 
