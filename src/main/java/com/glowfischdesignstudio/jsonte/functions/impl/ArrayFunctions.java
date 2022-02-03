@@ -353,6 +353,8 @@ public class ArrayFunctions {
         }
         List<Object> objects = arr.toList();
         return objects.stream()
+                // If it's JSONObject, we need to convert it to Map, so the order of the keys matches
+                .map(o -> o instanceof JSONObject ? ((JSONObject) o).toMap() : o)
                 .map(o -> o instanceof Map ? new JSONObject((Map<?, ?>) o) : o)
                 .map(o -> o instanceof Iterable ? new JSONArray((Iterable<?>) o) : o)
                 .map(Object::toString)
