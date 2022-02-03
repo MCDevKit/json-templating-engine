@@ -262,4 +262,63 @@ public class MathFunctions {
         return ~a.intValue();
     }
 
+    /**
+     * Performs signed left shift operation on a number by number of positions.
+     * @param a a: A number to shift
+     * @param b b: Number of positions to shift
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 4",
+     *     "test": "{{bitshiftLeft(1, 2)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Number bitshiftLeft(Number a, Number b) {
+        return a.intValue() << b.intValue();
+    }
+
+    /**
+     * Performs signed right shift operation on a number by number of positions.
+     * @param a a: A number to shift
+     * @param b b: Number of positions to shift
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 1",
+     *     "test": "{{bitshiftRight(4, 2)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Number bitshiftRight(Number a, Number b) {
+        return a.intValue() >> b.intValue();
+    }
+
+    /**
+     * Returns the number of digits of a number.
+     * @param a a: A number
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 3",
+     *     "test": "{{numberOfDigits(123)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Number numberOfDigits(Number a) {
+        if (a.intValue() == 0) {
+            return 1;
+        }
+        return (int)Math.log10(a.intValue()) + 1;
+    }
+
 }
