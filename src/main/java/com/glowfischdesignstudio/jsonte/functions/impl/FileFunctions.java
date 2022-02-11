@@ -2,8 +2,10 @@ package com.glowfischdesignstudio.jsonte.functions.impl;
 
 import com.glowfischdesignstudio.jsonte.exception.JsonTemplatingException;
 import com.glowfischdesignstudio.jsonte.functions.JSONFunction;
+import com.stirante.justpipe.Pipe;
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -189,5 +191,27 @@ public class FileFunctions {
     @JSONFunction
     private static Boolean isDir(String path) {
         return new File(path).isDirectory();
+    }
+
+    /**
+     * Returns json file as an object.
+     * @param path path: A path to the file
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be an object from the file data.json",
+     *     "test": "{{load('data.json')}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static JSONObject load(String path) {
+        try {
+            return new JSONObject(Pipe.from(new File(path)).toString());
+        } catch (IOException e) {
+            throw new JsonTemplatingException("An exception occurred while executing function 'load'", e);
+        }
     }
 }

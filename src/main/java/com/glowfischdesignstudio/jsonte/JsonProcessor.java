@@ -27,7 +27,7 @@ public class JsonProcessor {
     private static final Pattern ACTION_PATTERN = Pattern.compile("^\\{\\{[^{}]+}}$");
 
     private static final String[] DANGEROUS_FUNCTIONS =
-            {"fileList", "fileListRecurse", "imageWidth", "imageHeight", "getMinecraftInstallDir", "audioDuration", "isDir"};
+            {"fileList", "fileListRecurse", "imageWidth", "imageHeight", "getMinecraftInstallDir", "audioDuration", "isDir", "load"};
     public static final Map<String, FunctionDefinition> FUNCTIONS = new HashMap<>();
     public static final Map<Class<?>, Map<String, FunctionDefinition>> INSTANCE_FUNCTIONS = new HashMap<>();
     private static final List<Class<?>> ALLOWED_TYPES = Arrays.asList(
