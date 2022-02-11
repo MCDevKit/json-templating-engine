@@ -102,7 +102,7 @@ public class Main {
                     files.stream().filter(file -> file.getName().endsWith(".modl")).forEach(file -> {
                         System.out.println("Processing " + file.getName());
                         try {
-                            JsonProcessor.processModule(Pipe.from(file).toString(), scope, 0);
+                            JsonProcessor.processModule(Pipe.from(file).toString());
                         } catch (IOException e) {
                             throw new JsonTemplatingException("Failed to process file " + file.getName(), e);
                         }

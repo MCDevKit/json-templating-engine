@@ -3,8 +3,8 @@ package com.glowfischdesignstudio.jsonte;
 import com.glowfischdesignstudio.jsonte.exception.JsonTemplatingException;
 import com.glowfischdesignstudio.jsonte.functions.FunctionDefinition;
 import com.glowfischdesignstudio.jsonte.functions.JSONFunction;
-import com.glowfischdesignstudio.jsonte.functions.JSONLambda;
 import com.glowfischdesignstudio.jsonte.functions.JSONInstanceFunction;
+import com.glowfischdesignstudio.jsonte.functions.JSONLambda;
 import com.glowfischdesignstudio.jsonte.functions.impl.*;
 import com.glowfischdesignstudio.jsonte.utils.JsonUtils;
 import com.stirante.justpipe.Pipe;
@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class JsonProcessor {
 
@@ -35,7 +36,7 @@ public class JsonProcessor {
 
     private static boolean SAFE_MODE = false;
 
-    private static final Map<String, JSONObject> MODULES = new HashMap<>();
+    private static final Map<String, JsonModule> MODULES = new HashMap<>();
 
     static {
         register(StringFunctions.class);
@@ -54,7 +55,8 @@ public class JsonProcessor {
     }
 
     public static FunctionDefinition defineInstanceFunction(Class<?> instanceClass, String name) {
-        return INSTANCE_FUNCTIONS.computeIfAbsent(instanceClass, c -> new HashMap<>()).computeIfAbsent(name, FunctionDefinition::new);
+        return INSTANCE_FUNCTIONS.computeIfAbsent(instanceClass, c -> new HashMap<>())
+                .computeIfAbsent(name, FunctionDefinition::new);
     }
 
     public static void disableFunction(String name) {
@@ -68,26 +70,18 @@ public class JsonProcessor {
         SAFE_MODE = true;
     }
 
-    public static void processModule(String input, JSONObject globalScope, long timeout) {
-        long deadline = System.currentTimeMillis() + timeout;
-        if (timeout <= 0) {
-            deadline = Long.MAX_VALUE;
-        }
+    public static void processModule(String input) {
         JSONObject root = new JSONObject(input);
-        JSONObject scope = (JSONObject) JsonUtils.copyJson(globalScope);
-        if (root.has("$scope")) {
-            scope = JsonUtils.merge(root.getJSONObject("$scope"), globalScope);
-        }
         if (!root.has("$template")) {
             throw new JsonTemplatingException("Module does not have a template!");
         }
-        Object template = root.get("$template");
+        JSONObject template = root.getJSONObject("$template");
+        JSONObject scope = root.optJSONObject("$scope", new JSONObject());
         if (!root.has("$module")) {
             throw new JsonTemplatingException("Module does not have a name!");
         }
-        Object module = visit(JsonUtils.copyJson(template), new JSONObject(), scope, scope, "$template", deadline);
-        if (module instanceof JSONObject) {
-            MODULES.put(root.getString("$module"), (JSONObject) module);
+        if (template != null) {
+            MODULES.put(root.getString("$module"), new JsonModule(template, scope));
         }
         else {
             throw new JsonTemplatingException("A module must be an object!");
@@ -96,24 +90,74 @@ public class JsonProcessor {
 
     /**
      * Extends the template with modules defined by the object.
-     * @param extend Modules to extend the template with.
+     *
+     * @param extend   Modules to extend the template with.
      * @param template Template to extend.
-     * @param isCopy Whether to copy the template or not.
+     * @param isCopy   Whether to copy the template or not.
+     * @param scope    Scope to use.
+     * @param extra    Extra scope to use.
      * @return The extended template.
      */
-    private static JSONObject extendTemplate(Object extend, JSONObject template, boolean isCopy) {
+    private static JSONObject extendTemplate(Object extend, JSONObject template, boolean isCopy, JSONObject scope, JSONObject extra, long deadline) {
         List<String> modules = new ArrayList<>();
         if (extend instanceof JSONArray) {
-            ((JSONArray) extend).forEach(o -> modules.add(((String) o)));
+            List<Object> list = ((JSONArray) extend).toList();
+            for (int i = 0, listSize = list.size(); i < listSize; i++) {
+                Object o = list.get(i);
+                String s = (String) o;
+                if (ACTION_PATTERN.matcher(s).matches()) {
+                    Object value = resolve(s, extra, scope, scope, "$extend[" + i + "]").getValue();
+                    if (value instanceof JSONArray) {
+                        modules.addAll(((JSONArray) value).toList()
+                                .stream()
+                                .map(Object::toString)
+                                .collect(Collectors.toList()));
+                    }
+                    else if (value instanceof String) {
+                        modules.add((String) value);
+                    }
+                    else {
+                        throw new JsonTemplatingException("Invalid value for $extend[" + i + "]!");
+                    }
+                }
+                else {
+                    modules.add(s);
+                }
+            }
         }
         else if (extend instanceof String) {
-            modules.add((String) extend);
+            String s = (String) extend;
+            if (ACTION_PATTERN.matcher(s).matches()) {
+                Object value = resolve(s, extra, scope, scope, "$extend").getValue();
+                if (value instanceof JSONArray) {
+                    modules.addAll(((JSONArray) value).toList()
+                            .stream()
+                            .map(Object::toString)
+                            .collect(Collectors.toList()));
+                }
+                else if (value instanceof String) {
+                    modules.add((String) value);
+                }
+                else {
+                    throw new JsonTemplatingException("Invalid value for $extend!");
+                }
+            }
+            else {
+                modules.add(s);
+            }
         }
         for (String module : modules) {
             if (!MODULES.containsKey(module)) {
                 throw new JsonTemplatingException(String.format("Could not find a module named '%s'!", module));
             }
-            JSONObject parent = MODULES.get(module);
+            JsonModule mod = MODULES.get(module);
+            if (mod.getTemplate() == null) {
+                throw new JsonTemplatingException(String.format("Module '%s' does not have a template!", module));
+            }
+            JSONObject moduleScope = (JSONObject) JsonUtils.copyJson(scope);
+            JsonUtils.merge(moduleScope, mod.getScope());
+            JSONObject parent =
+                    (JSONObject) visit(JsonUtils.copyJson(mod.getTemplate()), extra, moduleScope, moduleScope, "[Module " + module + "]$template", deadline);
             if (isCopy) {
                 JsonUtils.merge(template, parent);
             }
@@ -126,10 +170,11 @@ public class JsonProcessor {
 
     /**
      * Processes a template.
-     * @param name Name of the template.
-     * @param input Input to process.
+     *
+     * @param name        Name of the template.
+     * @param input       Input to process.
      * @param globalScope Global scope to use.
-     * @param timeout Timeout for the processing in milliseconds.
+     * @param timeout     Timeout for the processing in milliseconds.
      * @return The map of name to processed stringified JSON.
      * @throws IOException If required files could not be read while processing.
      */
@@ -181,8 +226,9 @@ public class JsonProcessor {
                 extra.put("index", i);
                 extra.put("value", array.get(i));
                 if (isCopy) {
-                    String copyPath = visitStringValue(root.getString("$copy"), new JSONObject(), scope, new JSONObject(),
-                            name + "#/$copy").toString();
+                    String copyPath =
+                            visitStringValue(root.getString("$copy"), new JSONObject(), scope, new JSONObject(),
+                                    name + "#/$copy").toString();
                     if (copyPath.endsWith(".templ")) {
                         Map<String, String> map =
                                 processJson("copy", Pipe.from(new File(String.valueOf(visitStringValue(copyPath, extra, scope, array
@@ -202,7 +248,7 @@ public class JsonProcessor {
                     template = root.get("$template");
                 }
                 if (isExtend) {
-                    template = extendTemplate(root.get("$extend"), (JSONObject) template, isCopy);
+                    template = extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, extra, deadline);
                 }
                 if (isCopy && hasTemplate) {
                     template = JsonUtils.merge(new JSONObject(root.getJSONObject("$template")
@@ -236,7 +282,7 @@ public class JsonProcessor {
                 template = root.get("$template");
             }
             if (isExtend && template instanceof JSONObject) {
-                template = extendTemplate(root.get("$extend"), (JSONObject) template, isCopy);
+                template = extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, new JSONObject(), deadline);
             }
             else if (isExtend) {
                 throw new JsonTemplatingException("Cannot extend template that is not an object!");
@@ -265,9 +311,10 @@ public class JsonProcessor {
 
     /**
      * Resolves reference
+     *
      * @param reference The reference to resolve
-     * @param scope The scope to resolve the reference within
-     * @param path The path to the reference
+     * @param scope     The scope to resolve the reference within
+     * @param path      The path to the reference
      * @return The resolved reference or null if the reference could not be resolved
      */
     public static ReferenceResult resolve(String reference, JSONObject scope, String path) {
@@ -276,11 +323,12 @@ public class JsonProcessor {
 
     /**
      * Resolves reference
-     * @param reference The reference to resolve
-     * @param extraScope The extra scope to resolve the reference within (like iteration scope)
-     * @param fullScope The scope to resolve the reference within
+     *
+     * @param reference    The reference to resolve
+     * @param extraScope   The extra scope to resolve the reference within (like iteration scope)
+     * @param fullScope    The scope to resolve the reference within
      * @param thisInstance The current instance of the object
-     * @param path The path to the reference
+     * @param path         The path to the reference
      * @return The resolved reference or null if the reference could not be resolved
      */
     public static ReferenceResult resolve(String reference, JSONObject extraScope, JSONObject fullScope, Object thisInstance, String path) {
