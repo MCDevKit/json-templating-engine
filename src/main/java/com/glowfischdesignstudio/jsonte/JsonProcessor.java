@@ -220,6 +220,9 @@ public class JsonProcessor {
             String fileName = (String) files.get("fileName");
             JSONArray array =
                     (JSONArray) resolve(files.getString("array"), new JSONObject(), scope, scope, "$files.array").getValue();
+            if (array == null) {
+                throw new JsonTemplatingException("$files.array is null in " + name);
+            }
             for (int i = 0; i < array.length(); i++) {
                 checkDeadline(deadline);
                 JSONObject extra = new JSONObject();
