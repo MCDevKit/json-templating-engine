@@ -8,21 +8,13 @@ File conditionals
       "is_summonable": true,
       "runtime_identifier": "minecraft:thrown_trident"
     },
+    "component_groups": {
+      "egg:red": {"minecraft:variant": {"value": 6}},
+      "egg:green": {"minecraft:variant": {"value": -1}},
+      "egg:blue": {"minecraft:variant": {"value": -1}}
+    },
     "components": {
       "minecraft:persistent": {},
-      "minecraft:damage_sensor": {"triggers": [{
-        "deals_damage": false,
-        "on_damage": {"filters": {"none_of": [
-          {
-            "test": "has_damage",
-            "value": "none"
-          },
-          {
-            "test": "has_damage",
-            "value": "override"
-          }
-        ]}}
-      }]},
       "minecraft:pushable": {
         "is_pushable": false,
         "is_pushable_by_piston": false
@@ -41,12 +33,20 @@ File conditionals
         "width": 1,
         "height": 1
       },
-      "minecraft:scale": {"value": 2}
-    },
-    "component_groups": {
-      "egg:red": {"minecraft:variant": {"value": 6}},
-      "egg:green": {"minecraft:variant": {"value": -1}},
-      "egg:blue": {"minecraft:variant": {"value": -1}}
+      "minecraft:scale": {"value": 2},
+      "minecraft:damage_sensor": {"triggers": [{
+        "on_damage": {"filters": {"none_of": [
+          {
+            "test": "has_damage",
+            "value": "none"
+          },
+          {
+            "test": "has_damage",
+            "value": "override"
+          }
+        ]}},
+        "deals_damage": true
+      }]}
     },
     "events": {
       "egg:red": {"add": {"component_groups": [

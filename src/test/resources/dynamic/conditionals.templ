@@ -12,7 +12,8 @@
         "name": "blue",
         "number": 0
       }
-    ]
+    ],
+    "testBool": true
   },
   "$template": {
     "format_version": "1.15.0",
@@ -46,7 +47,7 @@
         "minecraft:damage_sensor": {
           "triggers": [
             {
-              "deals_damage": false,
+              "deals_damage": "{{=testBool}}",
               "on_damage": {
                 "filters": {
                   "none_of": [

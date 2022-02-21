@@ -505,7 +505,10 @@ public class JsonProcessor {
         while (m.find()) {
             String toReplace = m.group(0);
             ReferenceResult resolve = resolve(toReplace, extraScope, fullScope, currentScope, path);
-            if (resolve.getAction() == JsonAction.LITERAL) {
+            if (resolve.getAction() == JsonAction.LITERAL && resolve.getValue() instanceof Boolean) {
+                isBoolean = true;
+            }
+            if (resolve.getAction() == JsonAction.LITERAL && resolve.getValue() instanceof Number) {
                 isNumber = true;
             }
             if (resolve.getAction() == JsonAction.PREDICATE) {
