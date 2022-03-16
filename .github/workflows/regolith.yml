@@ -23,6 +23,8 @@ jobs:
         working-directory: './regolith-library'
         run: |
           cp ../target/json-tmpl.jar ./json_templating_engine/json-tmpl.jar
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           git add ./json_templating_engine/json-tmpl.jar
           git commit -m "Regolith library version ${{github.sha}}"
           git push origin master
