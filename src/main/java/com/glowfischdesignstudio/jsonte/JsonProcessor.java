@@ -230,7 +230,7 @@ public class JsonProcessor {
                 extra.put("value", array.get(i));
                 if (isCopy) {
                     String copyPath =
-                            visitStringValue(root.getString("$copy"), new JSONObject(), scope, new JSONObject(),
+                            visitStringValue(root.getString("$copy"), extra, scope, new JSONObject(),
                                     name + "#/$copy").toString();
                     if (copyPath.endsWith(".templ")) {
                         Map<String, String> map =
