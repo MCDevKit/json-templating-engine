@@ -1,0 +1,28 @@
+name: Java CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Build with Maven
+        run: mvn clean antlr4:antlr4 package
+      - uses: actions/checkout@v2
+        with:
+          repository: 'https://github.com/MCDevKit/regolith-library'
+          path: './regolith-library'
+      - name: Copy artifacts
+        working-directory: './regolith-library'
+        run: >
+        cp ../target/json-templ.jar ./json_templating_engine/json-templ.jar
+        git add ./json_templating_engine/json-templ.jar
+        git commit -m "Regolith library version ${GITHUB_SHA}"
+        git push origin master
