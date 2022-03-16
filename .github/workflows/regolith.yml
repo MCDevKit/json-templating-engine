@@ -32,3 +32,5 @@ jobs:
           git add ./json_templating_engine/json-tmpl.jar
           git commit -m "Regolith library version ${{github.ref_name}}"
           git push origin main
+          git tag json_templating_engine-${{ github.ref_name }}
+          git push --tags
