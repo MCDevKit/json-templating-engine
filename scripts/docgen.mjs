@@ -2,7 +2,9 @@ import fs from "fs";
 import "path";
 import * as Path from "path";
 
-fs.rmdirSync('dist', {recursive: true});
+if (fs.existsSync('dist')) {
+    fs.rmdirSync('dist', {recursive: true});
+}
 
 let files = fs.readdirSync('../src/main/java/com/glowfischdesignstudio/jsonte/functions/impl/');
 
@@ -86,15 +88,12 @@ has_children: true
                 lastSection = 'args';
                 let s = value.replace(/@param \w+ /, '');
                 sections[lastSection] += ' - ' + s.split(':')[0].trim() + ': ' + s.substr(s.split(':')[0].length + 1).trim() + '\n';
-            }
-            else if (value.startsWith("@example")) {
+            } else if (value.startsWith("@example")) {
                 lastSection = 'example';
                 sections[lastSection] += value.replace(/@example ?/, '') + '\n';
-            }
-            else if (value.startsWith("@deprecated")) {
+            } else if (value.startsWith("@deprecated")) {
                 sections.deprecated = true;
-            }
-            else {
+            } else {
                 sections[lastSection] += value + '\n';
             }
         })
