@@ -22,6 +22,9 @@ jobs:
       - name: Copy artifacts
         working-directory: './regolith-library'
         run: |
+          ls -la
+          ls -la ../
+          ls -la ../../
           cp ../../target/json-templ.jar ./json_templating_engine/json-templ.jar
           git add ./json_templating_engine/json-templ.jar
           git commit -m "Regolith library version ${{github.sha}}"
