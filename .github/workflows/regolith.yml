@@ -1,6 +1,9 @@
 name: Java CI
 
-on: [push]
+on:
+  push:
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -27,5 +30,5 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add ./json_templating_engine/json-tmpl.jar
-          git commit -m "Regolith library version ${{github.sha}}"
+          git commit -m "Regolith library version ${{github.ref_name}}"
           git push origin main
