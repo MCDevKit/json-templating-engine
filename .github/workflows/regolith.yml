@@ -30,7 +30,7 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add ./json_templating_engine/json-tmpl.jar
-          git commit -m "Regolith library version ${{github.ref_name}}"
+          git commit -m "JSON Templating Engine v${{github.ref_name}}"
           git push origin main
           git tag json_templating_engine-${{ github.ref_name }}
           git push --tags
