@@ -230,12 +230,11 @@ public class JsonProcessor {
                 extra.put("value", array.get(i));
                 if (isCopy) {
                     String copyPath =
-                            visitStringValue(root.getString("$copy"), extra, scope, new JSONObject(),
+                            visitStringValue(root.getString("$copy"), extra, scope, array.get(i),
                                     name + "#/$copy").toString();
                     if (copyPath.endsWith(".templ")) {
                         Map<String, String> map =
-                                processJson("copy", Pipe.from(new File(String.valueOf(visitStringValue(copyPath, extra, scope, array
-                                        .get(i), "$copy")))).toString(), globalScope, timeout);
+                                processJson("copy", Pipe.from(new File(copyPath)).toString(), globalScope, timeout);
                         if (map.values().size() != 1) {
                             throw new JsonTemplatingException("Cannot copy a template, that produces multiple files!");
                         }
@@ -243,8 +242,7 @@ public class JsonProcessor {
                     }
                     else {
                         template =
-                                new JSONObject(Pipe.from(new File(String.valueOf(visitStringValue(copyPath, extra, scope, array
-                                        .get(i), "$copy")))).toString());
+                                new JSONObject(Pipe.from(new File(copyPath)).toString());
                     }
                 }
                 else {

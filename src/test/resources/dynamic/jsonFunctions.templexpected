@@ -88,6 +88,8 @@ File jsonFunctions
       "conditionals.templexpected",
       "differentEntities.templ",
       "differentEntities.templexpected",
+      "dynamicCopy.templ",
+      "dynamicCopy.templexpected",
       "entityComponentGroups.templ",
       "entityComponentGroups.templexpected",
       "jsonFunctions.templ",
@@ -100,6 +102,7 @@ File jsonFunctions
     "fileListFiltered": [
       "conditionals.templ",
       "differentEntities.templ",
+      "dynamicCopy.templ",
       "entityComponentGroups.templ",
       "jsonFunctions.templ",
       "nested.templ",
