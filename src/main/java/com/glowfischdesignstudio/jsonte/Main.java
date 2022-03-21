@@ -10,6 +10,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -23,6 +25,8 @@ public class Main {
             JSONObject scope = new JSONObject();
             File out = null;
             List<String> input = new ArrayList<>();
+            List<PathMatcher> include = new ArrayList<>();
+            List<PathMatcher> exclude = new ArrayList<>();
             boolean removeSource = false;
             int i = 1;
             for (; i < args.length; i++) {
@@ -64,7 +68,24 @@ public class Main {
                             throw new JsonTemplatingException("Output file is not a directory");
                         }
                     }
-                } else {
+                    else if (args[i].equalsIgnoreCase("--include")) {
+                        i++;
+                        try {
+                            include.add(FileSystems.getDefault().getPathMatcher("glob:" + args[i]));
+                        } catch (Exception e) {
+                            throw new JsonTemplatingException("Failed to parse include pattern \"" + args[i] + "\"", e);
+                        }
+                    }
+                    else if (args[i].equalsIgnoreCase("--exclude")) {
+                        i++;
+                        try {
+                            exclude.add(FileSystems.getDefault().getPathMatcher("glob:" + args[i]));
+                        } catch (Exception e) {
+                            throw new JsonTemplatingException("Failed to parse exclude pattern \"" + args[i] + "\"", e);
+                        }
+                    }
+                }
+                else {
                     input.add(args[i]);
                 }
             }
@@ -97,7 +118,14 @@ public class Main {
             }
             else if (action.equalsIgnoreCase("compile")) {
                 if (input.size() > 0) {
-                    List<File> files = input.stream().map(File::new).filter(File::exists).flatMap(FileUtils::expand).collect(Collectors.toList());
+                    List<File> files = input.stream()
+                            .map(File::new)
+                            .filter(File::exists)
+                            .flatMap(FileUtils::expand)
+                            .filter(f -> (include.isEmpty() && exclude.isEmpty()) ||
+                                    (include.stream().anyMatch(m -> m.matches(f.toPath())) ||
+                                            exclude.stream().noneMatch(m -> m.matches(f.toPath()))))
+                            .collect(Collectors.toList());
                     File finalOut = out;
                     files.stream().filter(file -> file.getName().endsWith(".modl")).forEach(file -> {
                         System.out.println("Processing " + file.getName());
@@ -159,6 +187,8 @@ public class Main {
         System.out.println("Options:");
         System.out.println("\t--scope <file> - scope for processing");
         System.out.println("\t--out <dir> - output directory for compiled files");
+        System.out.println("\t--exclude <pattern> - exclude files matching pattern");
+        System.out.println("\t--include <pattern> - include files matching pattern");
         System.out.flush();
     }
 
