@@ -98,7 +98,7 @@ public class JsonProcessor {
      * @param extra    Extra scope to use.
      * @return The extended template.
      */
-    private static JSONObject extendTemplate(Object extend, JSONObject template, boolean isCopy, JSONObject scope, JSONObject extra, long deadline) {
+    private static JSONObject extendTemplate(Object extend, JSONObject template, boolean isCopy, JSONObject scope, Deque<Object> currentScope, JSONObject extra, long deadline) {
         List<String> modules = new ArrayList<>();
         if (extend instanceof JSONArray) {
             List<Object> list = ((JSONArray) extend).toList();
@@ -106,7 +106,7 @@ public class JsonProcessor {
                 Object o = list.get(i);
                 String s = (String) o;
                 if (ACTION_PATTERN.matcher(s).matches()) {
-                    Object value = resolve(s, extra, scope, new ArrayDeque<>(List.of(scope)), "$extend[" + i + "]").getValue();
+                    Object value = resolve(s, extra, scope, currentScope, "$extend[" + i + "]").getValue();
                     if (value instanceof JSONArray) {
                         modules.addAll(((JSONArray) value).toList()
                                 .stream()
@@ -128,7 +128,7 @@ public class JsonProcessor {
         else if (extend instanceof String) {
             String s = (String) extend;
             if (ACTION_PATTERN.matcher(s).matches()) {
-                Object value = resolve(s, extra, scope, new ArrayDeque<>(List.of(scope)), "$extend").getValue();
+                Object value = resolve(s, extra, scope, currentScope, "$extend").getValue();
                 if (value instanceof JSONArray) {
                     modules.addAll(((JSONArray) value).toList()
                             .stream()
@@ -157,7 +157,7 @@ public class JsonProcessor {
             JSONObject moduleScope = (JSONObject) JsonUtils.copyJson(scope);
             JsonUtils.merge(moduleScope, mod.getScope());
             JSONObject parent =
-                    (JSONObject) visit(JsonUtils.copyJson(mod.getTemplate()), extra, moduleScope, new ArrayDeque<>(List.of(moduleScope)), "[Module " + module + "]$template", deadline);
+                    (JSONObject) visit(JsonUtils.copyJson(mod.getTemplate()), extra, moduleScope, currentScope, "[Module " + module + "]$template", deadline);
             if (isCopy) {
                 JsonUtils.merge(template, parent);
             }
@@ -249,7 +249,7 @@ public class JsonProcessor {
                     template = root.get("$template");
                 }
                 if (isExtend) {
-                    template = extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, extra, deadline);
+                    template = extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, new ArrayDeque<>(List.of(array.get(i))), extra, deadline);
                 }
                 if (isCopy && hasTemplate) {
                     template = JsonUtils.merge(new JSONObject(root.getJSONObject("$template")
@@ -283,7 +283,7 @@ public class JsonProcessor {
                 template = root.get("$template");
             }
             if (isExtend && template instanceof JSONObject) {
-                template = extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, new JSONObject(), deadline);
+                template = extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, new ArrayDeque<>(List.of(new JSONObject())), new JSONObject(), deadline);
             }
             else if (isExtend) {
                 throw new JsonTemplatingException("Cannot extend template that is not an object!");
@@ -398,7 +398,13 @@ public class JsonProcessor {
                             continue;
                         case PREDICATE:
                             if (JsonUtils.toBoolean(e.getValue())) {
-                                Object template = obj.get(s);
+                                Object template;
+                                if (obj.get(s) instanceof String && ((String) obj.get(s)).startsWith("{{")) {
+                                    template = visitValue(obj.getString(s), extraScope, fullScope, currentScope,
+                                            path + "/" + s, deadline);
+                                } else {
+                                    template = obj.get(s);
+                                }
                                 Object copy = JsonUtils.copyJson(template);
                                 copy = visit(copy, extraScope, fullScope, currentScope,
                                         path + "[" + i + "]" + "/" + s, deadline);
@@ -465,7 +471,19 @@ public class JsonProcessor {
                     case PREDICATE:
                         toRemove.add(s);
                         if (JsonUtils.toBoolean(e.getValue())) {
-                            JSONObject template = obj.getJSONObject(s);
+                            JSONObject template = null;
+                            if (obj.get(s) instanceof JSONObject) {
+                                template = obj.getJSONObject(s);
+                            } else if (obj.get(s) instanceof String && ((String) obj.get(s)).startsWith("{{")) {
+                                Object o = visitValue(obj.getString(s), extraScope, fullScope, currentScope,
+                                        path + "/" + s, deadline);
+                                if (o instanceof JSONObject) {
+                                    template = (JSONObject) o;
+                                }
+                            }
+                            if (template == null) {
+                                throw new JsonTemplatingException("Predicate value is not an object!", path + "/" + s);
+                            }
                             JSONObject copy = (JSONObject) JsonUtils.copyJson(template);
                             copy = (JSONObject) visit(copy, extraScope, fullScope, currentScope,
                                     path + "/" + s, deadline);
