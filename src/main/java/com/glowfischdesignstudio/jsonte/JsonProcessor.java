@@ -319,7 +319,7 @@ public class JsonProcessor {
      * @return The resolved reference or null if the reference could not be resolved
      */
     public static ReferenceResult resolve(String reference, JSONObject scope, String path) {
-        return resolve(reference, new JSONObject(), scope, null, path);
+        return resolve(reference, new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())), path);
     }
 
     /**
