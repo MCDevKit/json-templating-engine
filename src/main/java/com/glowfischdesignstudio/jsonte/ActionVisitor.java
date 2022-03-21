@@ -2,13 +2,15 @@ package com.glowfischdesignstudio.jsonte;
 
 import org.json.JSONObject;
 
+import java.util.Deque;
+
 public class ActionVisitor extends JsonTemplateBaseVisitor<ReferenceResult> {
     private final JSONObject extraScope;
     private final JSONObject fullScope;
-    private final Object currentScope;
+    private final Deque<Object> currentScope;
     private final String path;
 
-    public ActionVisitor(JSONObject extraScope, JSONObject fullScope, Object currentScope, String path) {
+    public ActionVisitor(JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, String path) {
         this.extraScope = extraScope;
         this.fullScope = fullScope;
         this.currentScope = currentScope;

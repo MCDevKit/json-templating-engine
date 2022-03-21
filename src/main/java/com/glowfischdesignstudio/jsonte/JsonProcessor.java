@@ -106,7 +106,7 @@ public class JsonProcessor {
                 Object o = list.get(i);
                 String s = (String) o;
                 if (ACTION_PATTERN.matcher(s).matches()) {
-                    Object value = resolve(s, extra, scope, scope, "$extend[" + i + "]").getValue();
+                    Object value = resolve(s, extra, scope, new ArrayDeque<>(List.of(scope)), "$extend[" + i + "]").getValue();
                     if (value instanceof JSONArray) {
                         modules.addAll(((JSONArray) value).toList()
                                 .stream()
@@ -128,7 +128,7 @@ public class JsonProcessor {
         else if (extend instanceof String) {
             String s = (String) extend;
             if (ACTION_PATTERN.matcher(s).matches()) {
-                Object value = resolve(s, extra, scope, scope, "$extend").getValue();
+                Object value = resolve(s, extra, scope, new ArrayDeque<>(List.of(scope)), "$extend").getValue();
                 if (value instanceof JSONArray) {
                     modules.addAll(((JSONArray) value).toList()
                             .stream()
@@ -157,7 +157,7 @@ public class JsonProcessor {
             JSONObject moduleScope = (JSONObject) JsonUtils.copyJson(scope);
             JsonUtils.merge(moduleScope, mod.getScope());
             JSONObject parent =
-                    (JSONObject) visit(JsonUtils.copyJson(mod.getTemplate()), extra, moduleScope, moduleScope, "[Module " + module + "]$template", deadline);
+                    (JSONObject) visit(JsonUtils.copyJson(mod.getTemplate()), extra, moduleScope, new ArrayDeque<>(List.of(moduleScope)), "[Module " + module + "]$template", deadline);
             if (isCopy) {
                 JsonUtils.merge(template, parent);
             }
@@ -219,7 +219,7 @@ public class JsonProcessor {
             JSONObject files = root.getJSONObject("$files");
             String fileName = (String) files.get("fileName");
             JSONArray array =
-                    (JSONArray) resolve(files.getString("array"), new JSONObject(), scope, scope, "$files.array").getValue();
+                    (JSONArray) resolve(files.getString("array"), new JSONObject(), scope, new ArrayDeque<>(List.of(scope)), "$files.array").getValue();
             if (array == null) {
                 throw new JsonTemplatingException("$files.array is null in " + name);
             }
@@ -230,7 +230,7 @@ public class JsonProcessor {
                 extra.put("value", array.get(i));
                 if (isCopy) {
                     String copyPath =
-                            visitStringValue(root.getString("$copy"), extra, scope, array.get(i),
+                            visitStringValue(root.getString("$copy"), extra, scope, new ArrayDeque<>(List.of(array.get(i))),
                                     name + "#/$copy").toString();
                     if (copyPath.endsWith(".templ")) {
                         Map<String, String> map =
@@ -256,17 +256,17 @@ public class JsonProcessor {
                             .toString()), (JSONObject) template);
                 }
                 JsonUtils.removeNulls((JSONObject) template);
-                String mFileName = (String) visit(fileName, extra, scope, array.get(i), "$files.fileName", deadline);
-                result.put(mFileName, visitFile(JsonUtils.copyJson(template), extra, scope, array.get(i), deadline));
+                String mFileName = (String) visit(fileName, extra, scope, new ArrayDeque<>(List.of(array.get(i))), "$files.fileName", deadline);
+                result.put(mFileName, visitFile(JsonUtils.copyJson(template), extra, scope, new ArrayDeque<>(List.of(array.get(i))), deadline));
             }
         }
         else {
             if (isCopy) {
-                String copyPath = visitStringValue(root.getString("$copy"), new JSONObject(), scope, new JSONObject(),
+                String copyPath = visitStringValue(root.getString("$copy"), new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())),
                         name + "#/$copy").toString();
                 if (copyPath.endsWith(".templ")) {
                     Map<String, String> map =
-                            processJson("copy", Pipe.from(new File(String.valueOf(visitStringValue(copyPath, new JSONObject(), scope, new JSONObject(), "$copy"))))
+                            processJson("copy", Pipe.from(new File(String.valueOf(visitStringValue(copyPath, new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())), "$copy"))))
                                     .toString(), globalScope, timeout);
                     if (map.values().size() != 1) {
                         throw new JsonTemplatingException("Cannot copy a template, that produces multiple files!");
@@ -275,7 +275,7 @@ public class JsonProcessor {
                 }
                 else {
                     template =
-                            new JSONObject(Pipe.from(new File(String.valueOf(visitStringValue(copyPath, new JSONObject(), scope, new JSONObject(), "$copy"))))
+                            new JSONObject(Pipe.from(new File(String.valueOf(visitStringValue(copyPath, new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())), "$copy"))))
                                     .toString());
                 }
             }
@@ -292,12 +292,12 @@ public class JsonProcessor {
                 template = JsonUtils.merge(root.getJSONObject("$template"), (JSONObject) template);
             }
             JsonUtils.removeNulls((JSONObject) template);
-            result.put(name, visitFile(JsonUtils.copyJson(template), new JSONObject(), scope, scope, deadline));
+            result.put(name, visitFile(JsonUtils.copyJson(template), new JSONObject(), scope, new ArrayDeque<>(List.of(scope)), deadline));
         }
         return result;
     }
 
-    private static String visitFile(Object template, JSONObject extraScope, JSONObject fullScope, Object currentScope, long deadline) {
+    private static String visitFile(Object template, JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, long deadline) {
         visit(template, extraScope, fullScope, currentScope, "$template", deadline);
         return template instanceof JSONObject ? ((JSONObject) template).toString(2) : ((JSONArray) template).toString(2);
     }
@@ -332,7 +332,7 @@ public class JsonProcessor {
      * @param path         The path to the reference
      * @return The resolved reference or null if the reference could not be resolved
      */
-    public static ReferenceResult resolve(String reference, JSONObject extraScope, JSONObject fullScope, Object thisInstance, String path) {
+    public static ReferenceResult resolve(String reference, JSONObject extraScope, JSONObject fullScope, Deque<Object> thisInstance, String path) {
         JsonTemplateLexer lexer = new JsonTemplateLexer(CharStreams.fromString(reference));
         JsonTemplateParser parser = new JsonTemplateParser(new CommonTokenStream(lexer));
         setErrorHandlers(reference, path, lexer);
@@ -351,7 +351,7 @@ public class JsonProcessor {
         });
     }
 
-    private static Object visit(Object element, JSONObject extraScope, JSONObject fullScope, Object currentScope, String path, long deadline) {
+    private static Object visit(Object element, JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, String path, long deadline) {
         if (element instanceof JSONArray) {
             return visitArray((JSONArray) element, extraScope, fullScope, currentScope, path, deadline);
         }
@@ -363,7 +363,7 @@ public class JsonProcessor {
         }
     }
 
-    private static Object visitArray(JSONArray arr, JSONObject extraScope, JSONObject fullScope, Object currentScope, String path, long deadline) {
+    private static Object visitArray(JSONArray arr, JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, String path, long deadline) {
         JSONArray nArr = new JSONArray();
         for (int i = 0; i < arr.length(); i++) {
             checkDeadline(deadline);
@@ -383,9 +383,11 @@ public class JsonProcessor {
                                     JSONObject extra =
                                             JsonUtils.createIterationExtraScope(extraScope, arr1, i1, e.getName());
                                     Object copy = JsonUtils.copyJson(template);
-                                    copy = visit(copy, extra, fullScope, arr1.get(i1),
+                                    currentScope.push(arr1.get(i1));
+                                    copy = visit(copy, extra, fullScope, currentScope,
                                             path + "[" + i + "]", deadline);
                                     nArr.put(copy);
+                                    currentScope.pop();
                                 }
                             }
                             continue;
@@ -425,7 +427,7 @@ public class JsonProcessor {
         return nArr;
     }
 
-    private static Object visitObject(JSONObject obj, JSONObject extraScope, JSONObject fullScope, Object currentScope, String path, long deadline) {
+    private static Object visitObject(JSONObject obj, JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, String path, long deadline) {
         List<String> toRemove = new ArrayList<>();
         Map<String, Object> toAdd = new LinkedHashMap<>();
         for (String s : obj.keySet()) {
@@ -450,11 +452,13 @@ public class JsonProcessor {
                                 JSONObject extra =
                                         JsonUtils.createIterationExtraScope(extraScope, arr, i, e.getName());
                                 JSONObject copy = (JSONObject) JsonUtils.copyJson(template);
-                                copy = (JSONObject) visit(copy, extra, fullScope, arr.get(i),
+                                currentScope.push(arr.get(i));
+                                copy = (JSONObject) visit(copy, extra, fullScope, currentScope,
                                         path + "/" + s, deadline);
                                 for (String s1 : copy.keySet()) {
                                     toAdd.put(s1, copy.get(s1));
                                 }
+                                currentScope.pop();
                             }
                         }
                         break;
@@ -494,7 +498,7 @@ public class JsonProcessor {
         return obj;
     }
 
-    private static Object visitValue(Object element, JSONObject extraScope, JSONObject fullScope, Object currentScope, String path, long deadline) {
+    private static Object visitValue(Object element, JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, String path, long deadline) {
         Matcher m = TEMPLATE_PATTERN.matcher(String.valueOf(element));
         StringBuilder sb = new StringBuilder();
         boolean isNumber = element instanceof Number;
@@ -531,7 +535,7 @@ public class JsonProcessor {
         return sb.toString();
     }
 
-    private static StringBuffer visitStringValue(String string, JSONObject extraScope, JSONObject fullScope, Object currentScope, String path) {
+    private static StringBuffer visitStringValue(String string, JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, String path) {
         Matcher m = TEMPLATE_PATTERN.matcher(string);
         StringBuffer sb = new StringBuffer();
         while (m.find()) {

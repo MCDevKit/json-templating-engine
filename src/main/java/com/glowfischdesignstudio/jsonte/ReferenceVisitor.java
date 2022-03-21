@@ -15,12 +15,12 @@ import java.util.function.BiFunction;
 class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     private final JSONObject extraScope;
     private final JSONObject fullScope;
-    private final Object currentScope;
+    private final Deque<Object> currentScope;
     private final String path;
     private final JsonAction jsonAction;
     private final Deque<JSONObject> scopeStack = new ArrayDeque<>();
 
-    public ReferenceVisitor(JSONObject extraScope, JSONObject fullScope, Object currentScope, String path, JsonAction jsonAction) {
+    public ReferenceVisitor(JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, String path, JsonAction jsonAction) {
         this.extraScope = extraScope;
         this.fullScope = fullScope;
         this.currentScope = currentScope;
@@ -144,15 +144,20 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     public Object visitName(JsonTemplateParser.NameContext context) {
         String text = context.getText();
         if (text.equals("this")) {
-            return currentScope;
+            return currentScope.peek();
         }
         if (text.equals("value")) {
-            return currentScope;
+            return currentScope.peek();
         }
         Object newScope = resolveScope(text);
-        if (newScope == null && currentScope instanceof JSONObject &&
-                ((JSONObject) currentScope).has(text)) {
-            newScope = ((JSONObject) currentScope).get(text);
+
+        Iterator<Object> it = currentScope.iterator();
+        while (newScope == null && it.hasNext()) {
+            Object scope = it.next();
+            if (scope instanceof JSONObject &&
+                    ((JSONObject) scope).has(text)) {
+                newScope = ((JSONObject) scope).get(text);
+            }
         }
         if (newScope == null && extraScope.has(text)) {
             newScope = extraScope.get(text);
