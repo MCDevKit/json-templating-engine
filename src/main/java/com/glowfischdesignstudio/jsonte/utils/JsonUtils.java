@@ -55,7 +55,10 @@ public class JsonUtils {
             throw new IllegalArgumentException("Template and parent cannot be the same!");
         }
         for (String s : parent.keySet()) {
-            if (template.has(s)) {
+            if (s.startsWith("$") && !s.equals("$comment")) {
+                template.put(s.substring(1), parent.get(s));
+            }
+            else if (template.has(s)) {
                 if (parent.get(s) instanceof JSONObject) {
                     if (template.get(s) instanceof JSONArray) {
                         JSONArray arr = new JSONArray();

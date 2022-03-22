@@ -162,7 +162,7 @@ public class JsonProcessor {
                 JsonUtils.merge(template, parent);
             }
             else {
-                template = JsonUtils.merge(new JSONObject(parent.toString()), template);
+                template = JsonUtils.merge(new JSONObject(template.toString()), parent);
             }
         }
         return template;
