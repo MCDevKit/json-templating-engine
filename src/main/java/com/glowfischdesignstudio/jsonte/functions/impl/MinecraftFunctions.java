@@ -10,9 +10,9 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -94,10 +94,80 @@ public class MinecraftFunctions {
         return getLatestFile(path, rpVersions);
     }
 
+    /**
+     * Returns an array of paths to the latest vanilla resource pack files in a given directory.
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be an array of absolute paths to latest camera files across all vanilla packs",
+     *     "test": "{{listLatestRPFiles('cameras')}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static JSONArray listLatestRPFiles(String path) {
+        if (rpVersions == null) {
+            rpVersions = findPackVersions(false, VANILLA_RP_UUID);
+        }
+        return new JSONArray(listLatestFile(path, rpVersions));
+    }
+
+    /**
+     * Returns an array of paths to the latest vanilla behavior pack files in a given directory.
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be an array of absolute paths to latest spawn rules files across all vanilla packs",
+     *     "test": "{{listLatestBPFiles('spawn_rules')}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static JSONArray listLatestBPFiles(String path) {
+        if (bpVersions == null) {
+            bpVersions = findPackVersions(true, VANILLA_BP_UUID);
+        }
+        return new JSONArray(listLatestFile(path, bpVersions));
+    }
+
+    private static List<String> listLatestFile(String path, NavigableMap<Semver, File> versions) {
+        Map.Entry<Semver, File> entry = versions.firstEntry();
+        if (entry == null) {
+            throw new JsonTemplatingException("Failed to find the packs!");
+        }
+        File base = entry.getValue().getParentFile();
+        List<String> result = new ArrayList<>();
+        do {
+            File f = new File(entry.getValue(), path);
+            if (!f.exists()) {
+                continue;
+            }
+            try {
+                List<File> files = Files.walk(f.toPath())
+                        .map(Path::toFile)
+                        .filter(File::isFile)
+                        .collect(Collectors.toList());
+                for (File file : files) {
+                    String relativePath = entry.getValue().toPath().relativize(file.toPath()).toString();
+                    result.removeIf(s -> s.endsWith(relativePath));
+                    result.add(base.toPath().relativize(file.toPath()).toString());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        while ((entry = versions.higherEntry(entry.getKey())) != null);
+        return result.stream().map(s -> new File(base, s).getAbsolutePath()).collect(Collectors.toList());
+    }
+
     private static String getLatestFile(String path, NavigableMap<Semver, File> versions) {
         Map.Entry<Semver, File> entry = versions.lastEntry();
         if (entry == null) {
-            throw new JsonTemplatingException("Failed to find the latest pack!");
+            throw new JsonTemplatingException("Failed to find the the packs!");
         }
         File result = new File(entry.getValue(), path);
         while (!result.exists()) {
