@@ -79,7 +79,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             }
             else if (ctx.Or() != null) {
                 return JsonUtils.toBoolean(visit(ctx.reference(0))) || JsonUtils.toBoolean(visit(ctx.reference(1)));
-            } else if (ctx.Predicate() != null) {
+            } else if (ctx.Question() != null) {
                 return JsonUtils.toBoolean(visit(ctx.reference(0))) ? visit(ctx.reference(1)) : null;
             }
             Object f1 = visit(ctx.reference(0));
@@ -119,7 +119,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                 }
             }
         } else if (ctx.reference().size() == 3) {
-            if (ctx.Predicate() != null) {
+            if (ctx.Question() != null) {
                 return JsonUtils.toBoolean(visit(ctx.reference(0))) ? visit(ctx.reference(1)) : visit(ctx.reference(2));
             }
         }
@@ -184,7 +184,9 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             Object f2 = visit(context.field(1));
             Number n1 = JsonUtils.toNumber(f1);
             Number n2 = JsonUtils.toNumber(f2);
-            if (context.Add() != null) {
+            if (context.NullCoalescing() != null) {
+                return f1 == null ? f2 : f1;
+            } else if (context.Add() != null) {
                 if (f1 instanceof Number && f2 instanceof Number) {
                     boolean decimal = f1 instanceof Float || f1 instanceof Double || f2 instanceof Float ||
                             f2 instanceof Double;
@@ -303,7 +305,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             }
 
             if (newScope == null) {
-                if (jsonAction == JsonAction.PREDICATE) {
+                if (jsonAction == JsonAction.PREDICATE || context.Question() != null) {
                     return null;
                 }
                 throw new JsonTemplatingException("Failed to resolve \"" + context.getText() + "\" in ", path);
@@ -319,10 +321,16 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             if (object instanceof JSONArray) {
                 JSONArray arr = (JSONArray) object;
                 if (!(i instanceof Number)) {
+                    if (context.Question() != null) {
+                        return null;
+                    }
                     throw new JsonTemplatingException("Array index is not a number!", path);
                 }
                 int index = ((Number) i).intValue();
                 if (index >= arr.length() || index < 0) {
+                    if (context.Question() != null) {
+                        return null;
+                    }
                     throw new JsonTemplatingException("Array index out of bounds!", path);
                 }
                 return arr.toList().get(index);
@@ -331,10 +339,16 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             if (object instanceof List) {
                 List<?> arr = (List<?>) object;
                 if (!(i instanceof Number)) {
+                    if (context.Question() != null) {
+                        return null;
+                    }
                     throw new JsonTemplatingException("Array index is not a number!", path);
                 }
                 int index = ((Number) i).intValue();
                 if (index >= arr.size() || index < 0) {
+                    if (context.Question() != null) {
+                        return null;
+                    }
                     throw new JsonTemplatingException("Array index out of bounds!", path);
                 }
                 return arr.get(index);
@@ -342,22 +356,50 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             else if (object instanceof JSONObject) {
                 JSONObject obj = (JSONObject) object;
                 if (i instanceof Number) {
-                    return JsonUtils.getByIndex(obj, ((Number) i).intValue());
+                    int index = ((Number) i).intValue();
+                    if (index >= obj.length() || index < 0) {
+                        if (context.Question() != null) {
+                            return null;
+                        }
+                        throw new JsonTemplatingException("Object index out of bounds!", path);
+                    }
+                    return JsonUtils.getByIndex(obj, index);
                 }
-                if (i instanceof String && obj.has((String) i)) {
+                if (i instanceof String) {
+                    if (!obj.has((String) i)) {
+                        if (context.Question() != null) {
+                            return null;
+                        }
+                        throw new JsonTemplatingException("Object does not have key \"" + i + "\"!", path);
+                    }
                     return obj.get((String) i);
                 }
+                throw new JsonTemplatingException("Object index is not a number or string!", path);
             }
             // After adding lambdas, we also need to check for maps
             else if (object instanceof Map) {
                 //noinspection unchecked
                 Map<String, ?> obj = (Map<String, ?>) object;
                 if (i instanceof Number) {
+                    int index = ((Number) i).intValue();
+                    if (index >= obj.size() || index < 0) {
+                        if (context.Question() != null) {
+                            return null;
+                        }
+                        throw new JsonTemplatingException("Object index out of bounds!", path);
+                    }
                     return obj.get(new ArrayList<>(obj.keySet()).get(((Number) i).intValue()));
                 }
-                if (i instanceof String && obj.containsKey((String) i)) {
+                if (i instanceof String) {
+                    if (!obj.containsKey((String) i)) {
+                        if (context.Question() != null) {
+                            return null;
+                        }
+                        throw new JsonTemplatingException("Object does not have key \"" + i + "\"!", path);
+                    }
                     return obj.get((String) i);
                 }
+                throw new JsonTemplatingException("Object index is not a number or string!", path);
             }
         }
         if (context.NUMBER() != null) {

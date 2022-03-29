@@ -23,8 +23,10 @@ RightBracket: ']';
 
 //Actions
 Iteration: '#';
-Predicate: '?';
+Question: '?';
 Literal: '=';
+
+NullCoalescing: '??';
 
 Range: '..';
 As: 'as';
@@ -40,7 +42,7 @@ True: 'true';
 
 action
     : LeftMustache? Iteration reference (As name)? RightMustache?
-    | LeftMustache? Predicate reference RightMustache?
+    | LeftMustache? Question reference RightMustache?
     | LeftMustache? Literal reference RightMustache?
     | LeftMustache? reference RightMustache?
     ;
@@ -56,7 +58,7 @@ reference
    | reference And reference
    | reference Or reference
    | Not reference
-   | reference Predicate reference (':' reference)?
+   | reference Question reference (':' reference)?
    | LeftParen reference RightParen
    ;
 
@@ -79,13 +81,14 @@ field
    | ESCAPED_STRING
    | array
    | name
-   | field ('.' name)
-   | field (LeftBracket index RightBracket)
+   | field (Question? '.' name)
+   | field (Question? LeftBracket index RightBracket)
    | field LeftParen (function_param (Comma function_param)*)? RightParen
    | Subtract field
    | field (Divide | Multiply) field
    | field (Add | Subtract) field
    | field Range field
+   | field NullCoalescing field
    ;
 
 array

@@ -86,6 +86,7 @@ public class UtilityFunctions {
      * @param obj object: Object to check
      * @param key field name: Field name
      * @param def default value: Value returned if the field doesn't exist or null
+     * @deprecated
      * @example
      * Scope
      * <code>

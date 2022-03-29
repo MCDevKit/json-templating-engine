@@ -26,7 +26,7 @@ public class ActionVisitor extends JsonTemplateBaseVisitor<ReferenceResult> {
         else if (ctx.Literal() != null) {
             a = JsonAction.LITERAL;
         }
-        else if (ctx.Predicate() != null) {
+        else if (ctx.Question() != null) {
             a = JsonAction.PREDICATE;
         }
         return new ReferenceResult(new ReferenceVisitor(extraScope, fullScope, currentScope, path, a)
