@@ -1,5 +1,6 @@
 package com.glowfischdesignstudio.jsonte;
 
+import com.glowfischdesignstudio.jsonte.utils.StringUtils;
 import com.stirante.justpipe.Pipe;
 import org.json.JSONObject;
 import org.junit.jupiter.api.DynamicTest;
@@ -31,26 +32,26 @@ public class JsonProcessorTest {
 
                     StringWriter stringWriter = new StringWriter();
                     Pipe.from(file).to(stringWriter);
-                    Map<String, String> s = JsonProcessor.processJson(file.getName()
+                    Map<String, Object> s = JsonProcessor.processJson(file.getName()
                             .substring(0, file.getName().lastIndexOf('.')), stringWriter.toString(), new JSONObject(), 0);
                     StringBuilder result = new StringBuilder();
                     for (String s1 : s.keySet()) {
                         result.append("File ").append(s1).append("\n");
-                        result.append(s.get(s1)).append("\n");
+                        result.append(StringUtils.toString(s.get(s1), 2)).append("\n");
                     }
                     Pipe.from(result.toString()).to(expected);
                 }
                 Executable exec = () -> {
                     StringWriter stringWriter = new StringWriter();
                     Pipe.from(file).to(stringWriter);
-                    Map<String, String> s = JsonProcessor.processJson(file.getName()
+                    Map<String, Object> s = JsonProcessor.processJson(file.getName()
                             .substring(0, file.getName().lastIndexOf('.')), stringWriter.toString(), new JSONObject(), 0);
                     StringBuilder result = new StringBuilder();
                     for (String s1 : s.keySet()) {
                         System.out.println("File " + s1);
-                        System.out.println(s.get(s1));
+                        System.out.println(StringUtils.toString(s.get(s1), 2));
                         result.append("File ").append(s1).append("\n");
-                        result.append(s.get(s1)).append("\n");
+                        result.append(StringUtils.toString(s.get(s1), 2)).append("\n");
                     }
                     assertNotNull(s);
                     StringWriter out = new StringWriter();

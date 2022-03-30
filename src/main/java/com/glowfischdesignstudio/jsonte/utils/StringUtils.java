@@ -1,10 +1,28 @@
 package com.glowfischdesignstudio.jsonte.utils;
 
 import com.stirante.justpipe.function.IOFunction;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
 
 public class StringUtils {
+
+    public static String toString(Object o, int indent) {
+        if (o == null) {
+            return "null";
+        }
+        if (o instanceof String) {
+            return (String) o;
+        }
+        if (o instanceof JSONArray) {
+            return ((JSONArray) o).toString(indent);
+        }
+        if (o instanceof JSONObject) {
+            return ((JSONObject) o).toString(indent);
+        }
+        return o.toString();
+    }
 
     public static String def(String original, String def) {
         return original == null || original.isEmpty() ? def : original;

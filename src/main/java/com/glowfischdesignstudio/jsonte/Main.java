@@ -4,8 +4,10 @@ import com.glowfischdesignstudio.jsonte.exception.JsonTemplatingException;
 import com.glowfischdesignstudio.jsonte.utils.FileUtils;
 import com.glowfischdesignstudio.jsonte.utils.JsonUtils;
 import com.glowfischdesignstudio.jsonte.utils.PipeExtensions;
+import com.glowfischdesignstudio.jsonte.utils.StringUtils;
 import com.stirante.justpipe.Pipe;
 import com.stirante.justpipe.exception.RuntimeIOException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -28,10 +30,14 @@ public class Main {
             List<PathMatcher> include = new ArrayList<>();
             List<PathMatcher> exclude = new ArrayList<>();
             boolean removeSource = false;
+            int indent = 2;
             int i = 1;
             for (; i < args.length; i++) {
                 if (args[i].equalsIgnoreCase("--remove-src")) {
                     removeSource = true;
+                }
+                else if (args[i].equalsIgnoreCase("--minify")) {
+                    indent = 0;
                 }
                 else if (args[i].startsWith("--") && args.length > i + 1) {
                     if (args[i].equalsIgnoreCase("--scope")) {
@@ -135,6 +141,7 @@ public class Main {
                             throw new JsonTemplatingException("Failed to process file " + file.getName(), e);
                         }
                     });
+                    int finalIndent = indent;
                     files.stream().filter(file -> file.getName().endsWith(".templ")).forEach(file -> {
                         System.out.println("Compiling " + file.getName());
                         try {
@@ -143,7 +150,7 @@ public class Main {
                                     .split(pipe -> JsonProcessor.processJson(name, pipe.toString(), scope, 0)
                                             .entrySet()
                                             .stream()
-                                            .map(e -> Pipe.from(e.getValue()).with("name", e.getKey()))
+                                            .map(e -> Pipe.from(StringUtils.toString(e.getValue(), finalIndent)).with("name", e.getKey()))
                                             .collect(Collectors.toList()))
                                     .forEach(pipe -> {
                                         if (finalOut != null && finalOut.exists()) {

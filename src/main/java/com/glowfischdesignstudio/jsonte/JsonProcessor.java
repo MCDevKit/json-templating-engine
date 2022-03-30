@@ -178,14 +178,14 @@ public class JsonProcessor {
      * @return The map of name to processed stringified JSON.
      * @throws IOException If required files could not be read while processing.
      */
-    public static Map<String, String> processJson(String name, String input, JSONObject globalScope, long timeout) throws IOException {
+    public static Map<String, Object> processJson(String name, String input, JSONObject globalScope, long timeout) throws IOException {
         // Set up the deadline
         long deadline = System.currentTimeMillis() + timeout;
         if (timeout <= 0) {
             deadline = Long.MAX_VALUE;
         }
         // Parse the input
-        Map<String, String> result = new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
         JSONObject root;
         try {
             root = new JSONObject(input);
@@ -233,7 +233,7 @@ public class JsonProcessor {
                             visitStringValue(root.getString("$copy"), extra, scope, new ArrayDeque<>(List.of(array.get(i))),
                                     name + "#/$copy").toString();
                     if (copyPath.endsWith(".templ")) {
-                        Map<String, String> map =
+                        Map<String, Object> map =
                                 processJson("copy", Pipe.from(new File(copyPath)).toString(), globalScope, timeout);
                         if (map.values().size() != 1) {
                             throw new JsonTemplatingException("Cannot copy a template, that produces multiple files!");
@@ -265,7 +265,7 @@ public class JsonProcessor {
                 String copyPath = visitStringValue(root.getString("$copy"), new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())),
                         name + "#/$copy").toString();
                 if (copyPath.endsWith(".templ")) {
-                    Map<String, String> map =
+                    Map<String, Object> map =
                             processJson("copy", Pipe.from(new File(String.valueOf(visitStringValue(copyPath, new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())), "$copy"))))
                                     .toString(), globalScope, timeout);
                     if (map.values().size() != 1) {
@@ -297,9 +297,9 @@ public class JsonProcessor {
         return result;
     }
 
-    private static String visitFile(Object template, JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, long deadline) {
+    private static Object visitFile(Object template, JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, long deadline) {
         visit(template, extraScope, fullScope, currentScope, "$template", deadline);
-        return template instanceof JSONObject ? ((JSONObject) template).toString(2) : ((JSONArray) template).toString(2);
+        return template;
     }
 
     public static JsonTemplateParser.LambdaContext resolveLambdaTree(String src, String path) {
