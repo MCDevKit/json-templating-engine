@@ -153,6 +153,34 @@ public class ArrayFunctions {
     }
 
     /**
+     * Returns an array with sorted elements. Objects and arrays are not sorted.
+     * @param arr array: Source array
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be [1, 2, 3, 5, 8, 10]",
+     *     "test": "{{sort([2, 3, 1, 5, 8, 10])}}"
+     *   }
+     * }
+     * </code>
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @JSONFunction
+    @JSONInstanceFunction
+    private static JSONArray sort(JSONArray arr) {
+        List<?> l = new ArrayList<>(arr.toList());
+
+        l.sort((o1, o2) -> {
+            if (o1 instanceof Comparable && o2 instanceof Comparable) {
+                return ((Comparable) o1).compareTo(o2);
+            }
+            return 0;
+        });
+        return new JSONArray(l);
+    }
+
+    /**
      * Returns whether supplied array contains provided value.
      * @param arr array: Array to check
      * @param value value: Value to search for (currently a string, or a number only)
