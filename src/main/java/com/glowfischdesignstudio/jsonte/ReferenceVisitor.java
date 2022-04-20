@@ -200,16 +200,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                 }
             } else if (n1 != null && n2 != null) {
                 if (context.Range() != null) {
-                    JSONArray arr = new JSONArray();
-                    int from = n1.intValue();
-                    int to = n2.intValue();
-                    if (from > to) {
-                        return arr;
-                    }
-                    for (int i = from; i <= to; i++) {
-                        arr.put(i);
-                    }
-                    return arr;
+                    return ArrayUtils.range(n1.intValue(), n2.intValue());
                 }
                 boolean decimal = n1 instanceof Float || n1 instanceof Double || n1 instanceof BigDecimal || n2 instanceof Float ||
                         n2 instanceof Double || n2 instanceof BigDecimal;

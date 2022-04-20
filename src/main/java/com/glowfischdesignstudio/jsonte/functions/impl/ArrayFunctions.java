@@ -4,6 +4,7 @@ import com.glowfischdesignstudio.jsonte.functions.JSONLambda;
 import com.glowfischdesignstudio.jsonte.exception.JsonTemplatingException;
 import com.glowfischdesignstudio.jsonte.functions.JSONFunction;
 import com.glowfischdesignstudio.jsonte.functions.JSONInstanceFunction;
+import com.glowfischdesignstudio.jsonte.utils.ArrayUtils;
 import com.glowfischdesignstudio.jsonte.utils.JsonUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -326,6 +327,25 @@ public class ArrayFunctions {
     @JSONInstanceFunction
     private static Integer count(JSONArray arr) {
         return arr.toList().size();
+    }
+
+    /**
+     * Returns all indices of the array.
+     * @param arr array: Source array
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be [0, 1, 2, 3, 4]",
+     *     "test": "{{(4..8).range()}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    @JSONInstanceFunction
+    private static JSONArray range(JSONArray arr) {
+        return ArrayUtils.range(0, arr.length() - 1);
     }
 
 

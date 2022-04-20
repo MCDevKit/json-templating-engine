@@ -1,5 +1,7 @@
 package com.glowfischdesignstudio.jsonte.utils;
 
+import org.json.JSONArray;
+
 import java.util.Arrays;
 
 public class ArrayUtils {
@@ -16,4 +18,22 @@ public class ArrayUtils {
         result[0] = element;
         return result;
     }
+
+    /**
+     * Returns a JSON array that contains all numbers between start and end, inclusive.
+     * @param start The first number in the array.
+     * @param end The last number in the array.
+     * @return A JSON array that contains all numbers between start and end, inclusive.
+     */
+    public static JSONArray range(int start, int end) {
+        JSONArray arr = new JSONArray();
+        if (start > end) {
+            return arr;
+        }
+        for (int i = start; i <= end; i++) {
+            arr.put(i);
+        }
+        return arr;
+    }
+
 }
