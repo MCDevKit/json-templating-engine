@@ -430,7 +430,9 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                 pushScope(ctx.name(i).getText(), o[i]);
             }
             Object result = visit(ctx.reference());
-            popScope();
+            for (int i = 0; i < ctx.name().size(); i++) {
+                popScope();
+            }
             return result;
         };
     }
