@@ -157,7 +157,8 @@ public class JsonProcessor {
             JSONObject moduleScope = (JSONObject) JsonUtils.copyJson(scope);
             JsonUtils.merge(moduleScope, mod.getScope());
             JSONObject parent =
-                    (JSONObject) visit(JsonUtils.copyJson(mod.getTemplate()), extra, moduleScope, currentScope, "[Module " + module + "]$template", deadline);
+                    (JSONObject) visit(JsonUtils.copyJson(mod.getTemplate()), extra, moduleScope, currentScope,
+                            "[Module " + module + "]$template", deadline);
             if (isCopy) {
                 JsonUtils.merge(template, parent);
             }
@@ -249,21 +250,24 @@ public class JsonProcessor {
                     template = root.get("$template");
                 }
                 if (isExtend) {
-                    template = extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, new ArrayDeque<>(List.of(array.get(i))), extra, deadline);
+                    template =
+                            extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, new ArrayDeque<>(List.of(array.get(i))), extra, deadline);
                 }
                 if (isCopy && hasTemplate) {
                     template = JsonUtils.merge(new JSONObject(root.getJSONObject("$template")
                             .toString()), (JSONObject) template);
                 }
                 JsonUtils.removeNulls((JSONObject) template);
-                String mFileName = (String) visit(fileName, extra, scope, new ArrayDeque<>(List.of(array.get(i))), "$files.fileName", deadline);
+                String mFileName =
+                        (String) visit(fileName, extra, scope, new ArrayDeque<>(List.of(array.get(i))), "$files.fileName", deadline);
                 result.put(mFileName, visitFile(JsonUtils.copyJson(template), extra, scope, new ArrayDeque<>(List.of(array.get(i))), deadline));
             }
         }
         else {
             if (isCopy) {
-                String copyPath = visitStringValue(root.getString("$copy"), new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())),
-                        name + "#/$copy").toString();
+                String copyPath =
+                        visitStringValue(root.getString("$copy"), new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())),
+                                name + "#/$copy").toString();
                 if (copyPath.endsWith(".templ")) {
                     Map<String, Object> map =
                             processJson("copy", Pipe.from(new File(String.valueOf(visitStringValue(copyPath, new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())), "$copy"))))
@@ -283,7 +287,8 @@ public class JsonProcessor {
                 template = root.get("$template");
             }
             if (isExtend && template instanceof JSONObject) {
-                template = extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, new ArrayDeque<>(List.of(new JSONObject())), new JSONObject(), deadline);
+                template =
+                        extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, new ArrayDeque<>(List.of(new JSONObject())), new JSONObject(), deadline);
             }
             else if (isExtend) {
                 throw new JsonTemplatingException("Cannot extend template that is not an object!");
@@ -402,7 +407,8 @@ public class JsonProcessor {
                                 if (obj.get(s) instanceof String && ((String) obj.get(s)).startsWith("{{")) {
                                     template = visitValue(obj.getString(s), extraScope, fullScope, currentScope,
                                             path + "/" + s, deadline);
-                                } else {
+                                }
+                                else {
                                     template = obj.get(s);
                                 }
                                 Object copy = JsonUtils.copyJson(template);
@@ -474,7 +480,8 @@ public class JsonProcessor {
                             JSONObject template = null;
                             if (obj.get(s) instanceof JSONObject) {
                                 template = obj.getJSONObject(s);
-                            } else if (obj.get(s) instanceof String && ((String) obj.get(s)).startsWith("{{")) {
+                            }
+                            else if (obj.get(s) instanceof String && ((String) obj.get(s)).startsWith("{{")) {
                                 Object o = visitValue(obj.getString(s), extraScope, fullScope, currentScope,
                                         path + "/" + s, deadline);
                                 if (o instanceof JSONObject) {
@@ -525,11 +532,24 @@ public class JsonProcessor {
         while (m.find()) {
             String toReplace = m.group(0);
             ReferenceResult resolve = resolve(toReplace, extraScope, fullScope, currentScope, path);
-            if (resolve.getAction() == JsonAction.LITERAL && resolve.getValue() instanceof Boolean) {
-                isBoolean = true;
-            }
-            if (resolve.getAction() == JsonAction.LITERAL && resolve.getValue() instanceof Number) {
-                isNumber = true;
+            if (resolve.getAction() == JsonAction.LITERAL) {
+                if (resolve.getValue() instanceof Boolean) {
+                    isBoolean = true;
+                }
+                if (resolve.getValue() instanceof Number) {
+                    isNumber = true;
+                }
+                if (resolve.getValue() instanceof String) {
+                    if (((String) resolve.getValue()).equalsIgnoreCase("true") ||
+                            ((String) resolve.getValue()).equalsIgnoreCase("false")) {
+                        isBoolean = true;
+                    }
+                    try {
+                        Float.parseFloat((String) resolve.getValue());
+                        isNumber = true;
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
             }
             if (resolve.getAction() == JsonAction.PREDICATE) {
                 isBoolean = true;
