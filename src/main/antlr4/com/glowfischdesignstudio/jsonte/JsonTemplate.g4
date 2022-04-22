@@ -41,34 +41,19 @@ False: 'false';
 True: 'true';
 
 action
-    : LeftMustache? Iteration reference (As name)? RightMustache?
-    | LeftMustache? Question reference RightMustache?
-    | LeftMustache? Literal reference RightMustache?
-    | LeftMustache? reference RightMustache?
+    : LeftMustache? Iteration field (As name)? RightMustache?
+    | LeftMustache? Question field RightMustache?
+    | LeftMustache? Literal field RightMustache?
+    | LeftMustache? field RightMustache?
     ;
 
-reference
-   : field
-   | reference Equal reference
-   | reference Less reference
-   | reference LessOrEqual reference
-   | reference Greater reference
-   | reference GreaterOrEqual reference
-   | reference NotEqual reference
-   | reference And reference
-   | reference Or reference
-   | Not reference
-   | reference Question reference (':' reference)?
-   | LeftParen reference RightParen
-   ;
-
 lambda
-    : name Arrow reference
-    | LeftParen (name (Comma name)*)* RightParen Arrow reference
+    : name Arrow field
+    | LeftParen (name (Comma name)*)* RightParen Arrow field
     ;
 
 function_param
-    : reference
+    : field
     | lambda
     ;
 
@@ -89,10 +74,20 @@ field
    | field (Add | Subtract) field
    | field Range field
    | field NullCoalescing field
+   | field Equal field
+   | field Less field
+   | field LessOrEqual field
+   | field Greater field
+   | field GreaterOrEqual field
+   | field NotEqual field
+   | field And field
+   | field Or field
+   | Not field
+   | field Question field (':' field)?
    ;
 
 array
-    : LeftBracket (reference (Comma reference)*)? RightBracket
+    : LeftBracket (field (Comma field)*)? RightBracket
     ;
 
 name
@@ -100,7 +95,7 @@ name
    ;
 
 index
-   : reference
+   : field
    | NUMBER
    | ESCAPED_STRING
    ;

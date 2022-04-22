@@ -29,8 +29,8 @@ public class ActionVisitor extends JsonTemplateBaseVisitor<ReferenceResult> {
         else if (ctx.Question() != null) {
             a = JsonAction.PREDICATE;
         }
-        return new ReferenceResult(new ReferenceVisitor(extraScope, fullScope, currentScope, path, a)
-                .visit(ctx.reference()), a,
+        return new ReferenceResult(new FieldVisitor(extraScope, fullScope, currentScope, path, a)
+                .visit(ctx.field()), a,
                 ctx.As() != null ? ctx.name().getText() : "value");
     }
 }

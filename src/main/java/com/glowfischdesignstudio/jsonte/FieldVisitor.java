@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.BiFunction;
 
-class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
+class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
     private final JSONObject extraScope;
     private final JSONObject fullScope;
     private final Deque<Object> currentScope;
@@ -20,7 +20,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     private final JsonAction jsonAction;
     private final Deque<JSONObject> scopeStack = new ArrayDeque<>();
 
-    public ReferenceVisitor(JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, String path, JsonAction jsonAction) {
+    public FieldVisitor(JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, String path, JsonAction jsonAction) {
         this.extraScope = extraScope;
         this.fullScope = fullScope;
         this.currentScope = currentScope;
@@ -54,76 +54,10 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
     @Override
     public Object visitArray(JsonTemplateParser.ArrayContext ctx) {
         JSONArray result = new JSONArray();
-        for (JsonTemplateParser.ReferenceContext f : ctx.reference()) {
+        for (JsonTemplateParser.FieldContext f : ctx.field()) {
             result.put(visit(f));
         }
         return result;
-    }
-
-    @Override
-    public Object visitReference(JsonTemplateParser.ReferenceContext ctx) {
-        if (ctx.field() != null) {
-            return visit(ctx.field());
-        }
-        if (ctx.reference().size() == 1) {
-            Object f1 = visit(ctx.reference(0));
-            if (ctx.Not() != null) {
-                return !JsonUtils.toBoolean(f1);
-            }
-            return f1;
-        }
-        else if (ctx.reference().size() == 2) {
-            // Move AND and OR here to make those operators short-circuiting
-            if (ctx.And() != null) {
-                return JsonUtils.toBoolean(visit(ctx.reference(0))) && JsonUtils.toBoolean(visit(ctx.reference(1)));
-            }
-            else if (ctx.Or() != null) {
-                return JsonUtils.toBoolean(visit(ctx.reference(0))) || JsonUtils.toBoolean(visit(ctx.reference(1)));
-            } else if (ctx.Question() != null) {
-                return JsonUtils.toBoolean(visit(ctx.reference(0))) ? visit(ctx.reference(1)) : null;
-            }
-            Object f1 = visit(ctx.reference(0));
-            Object f2 = visit(ctx.reference(1));
-            Number n1 = JsonUtils.toNumber(f1);
-            Number n2 = JsonUtils.toNumber(f2);
-            if (ctx.Equal() != null) {
-                if (f1 instanceof Number && f2 instanceof Number) {
-                    return ((Number) f1).doubleValue() == ((Number) f2).doubleValue();
-                }
-                return Objects.equals(f1, f2);
-            }
-            else if (ctx.NotEqual() != null) {
-                return !Objects.equals(f1, f2);
-            }
-            else {
-                if (n1 != null && n2 != null) {
-                    if (ctx.Greater() != null) {
-                        return n1.doubleValue() > n2.doubleValue();
-                    }
-                    if (ctx.Less() != null) {
-                        return n1.doubleValue() < n2.doubleValue();
-                    }
-                    if (ctx.GreaterOrEqual() != null) {
-                        return n1.doubleValue() >= n2.doubleValue();
-                    }
-                    if (ctx.LessOrEqual() != null) {
-                        return n1.doubleValue() <= n2.doubleValue();
-                    }
-                }
-                else if (ctx.Greater() != null || ctx.Less() != null || ctx.GreaterOrEqual() != null ||
-                        ctx.LessOrEqual() != null) {
-                    return false;
-                }
-                else {
-                    return "NaN";
-                }
-            }
-        } else if (ctx.reference().size() == 3) {
-            if (ctx.Question() != null) {
-                return JsonUtils.toBoolean(visit(ctx.reference(0))) ? visit(ctx.reference(1)) : visit(ctx.reference(2));
-            }
-        }
-        return null;
     }
 
     @Override
@@ -134,8 +68,8 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
         else if (context.ESCAPED_STRING() != null) {
             return StringUtils.unescape(context.NUMBER().getText());
         }
-        else if (context.reference() != null) {
-            return visit(context.reference());
+        else if (context.field() != null) {
+            return visit(context.field());
         }
         return -1;
     }
@@ -179,7 +113,18 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
         if (context.False() != null) {
             return false;
         }
+        if (context.Not() != null) {
+            return !JsonUtils.toBoolean(visit(context.field(0)));
+        }
         if (context.field().size() == 2) {
+            // Move AND and OR here to make those operators short-circuiting
+            if (context.And() != null) {
+                return JsonUtils.toBoolean(visit(context.field(0))) && JsonUtils.toBoolean(visit(context.field(1)));
+            } else if (context.Or() != null) {
+                return JsonUtils.toBoolean(visit(context.field(0))) || JsonUtils.toBoolean(visit(context.field(1)));
+            } else if (context.Question() != null) {
+                return JsonUtils.toBoolean(visit(context.field(0))) ? visit(context.field(1)) : null;
+            }
             Object f1 = visit(context.field(0));
             Object f2 = visit(context.field(1));
             Number n1 = JsonUtils.toNumber(f1);
@@ -187,20 +132,41 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             if (context.NullCoalescing() != null) {
                 return f1 == null ? f2 : f1;
             } else if (context.Add() != null) {
-                if (f1 instanceof Number && f2 instanceof Number) {
+                if (((f1 instanceof Number && f2 instanceof Number) || (f1 instanceof Boolean && f2 instanceof Boolean)) && n1 != null && n2 != null) {
                     boolean decimal = f1 instanceof Float || f1 instanceof Double || f2 instanceof Float ||
                             f2 instanceof Double;
                     if (decimal) {
-                        return ((Number) f1).doubleValue() + ((Number) f2).doubleValue();
+                        return n1.doubleValue() + n2.doubleValue();
                     }
-                    return ((Number) f1).intValue() + ((Number) f2).intValue();
+                    return n1.intValue() + n2.intValue();
                 }
                 else {
                     return f1.toString() + f2.toString();
                 }
-            } else if (n1 != null && n2 != null) {
+            } else if (context.Equal() != null) {
+                if (f1 instanceof Number && f2 instanceof Number) {
+                    return ((Number) f1).doubleValue() == ((Number) f2).doubleValue();
+                }
+                return Objects.equals(f1, f2);
+            }
+            else if (context.NotEqual() != null) {
+                return !Objects.equals(f1, f2);
+            }
+            else if (n1 != null && n2 != null) {
                 if (context.Range() != null) {
                     return ArrayUtils.range(n1.intValue(), n2.intValue());
+                }
+                if (context.Greater() != null) {
+                    return n1.doubleValue() > n2.doubleValue();
+                }
+                if (context.Less() != null) {
+                    return n1.doubleValue() < n2.doubleValue();
+                }
+                if (context.GreaterOrEqual() != null) {
+                    return n1.doubleValue() >= n2.doubleValue();
+                }
+                if (context.LessOrEqual() != null) {
+                    return n1.doubleValue() <= n2.doubleValue();
                 }
                 boolean decimal = n1 instanceof Float || n1 instanceof Double || n1 instanceof BigDecimal || n2 instanceof Float ||
                         n2 instanceof Double || n2 instanceof BigDecimal;
@@ -226,6 +192,17 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
                         return n1.intValue() * n2.intValue();
                     }
                 }
+            }
+            else if (context.Greater() != null || context.Less() != null || context.GreaterOrEqual() != null ||
+                    context.LessOrEqual() != null) {
+                return false;
+            }
+            else {
+                return "NaN";
+            }
+        } else if (context.field().size() == 3) {
+            if (context.Question() != null) {
+                return JsonUtils.toBoolean(visit(context.field(0))) ? visit(context.field(1)) : visit(context.field(2));
             }
         }
         if (context.LeftParen() != null && context.field().size() == 1 && context.children.indexOf(context.field(0)) == 0) {
@@ -429,7 +406,7 @@ class ReferenceVisitor extends JsonTemplateBaseVisitor<Object> {
             for (int i = 0; i < ctx.name().size(); i++) {
                 pushScope(ctx.name(i).getText(), o[i]);
             }
-            Object result = visit(ctx.reference());
+            Object result = visit(ctx.field());
             for (int i = 0; i < ctx.name().size(); i++) {
                 popScope();
             }

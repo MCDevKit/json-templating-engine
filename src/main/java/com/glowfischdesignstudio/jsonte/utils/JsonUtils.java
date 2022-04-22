@@ -173,6 +173,9 @@ public class JsonUtils {
         if (o instanceof Number) {
             return (Number) o;
         }
+        else if (o instanceof Boolean) {
+            return (Boolean) o ? 1 : 0;
+        }
         else if (o instanceof String) {
             if (((String) o).indexOf('.') != -1) {
                 try {
