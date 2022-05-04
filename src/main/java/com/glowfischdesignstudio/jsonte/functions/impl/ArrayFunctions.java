@@ -377,7 +377,7 @@ public class ArrayFunctions {
 
 
     /**
-     * Returns index of given element inside the array or -1 if not found.
+     * Returns index of the first occurrence of given element inside the array or -1 if not found.
      * @param arr array: Source array
      * @param element element: Element to find
      * @example
@@ -405,6 +405,38 @@ public class ArrayFunctions {
                 .map(o -> o instanceof JSONArray ? ((JSONArray) o).toList() : o)
                 .collect(Collectors.toList())
                 .indexOf(element);
+    }
+
+
+    /**
+     * Returns index of the last occurrence of given element inside the array or -1 if not found.
+     * @param arr array: Source array
+     * @param element element: Element to find
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 1",
+     *     "test": "{{lastIndexOf(1..5, 2)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    @JSONInstanceFunction
+    private static Object lastIndexOf(JSONArray arr, Object element) {
+        if (element instanceof JSONArray) {
+            element = ((JSONArray) element).toList();
+        }
+        else if (element instanceof JSONObject) {
+            element = ((JSONObject) element).toMap();
+        }
+        List<Object> objects = arr.toList();
+        return objects.stream()
+                .map(o -> o instanceof JSONObject ? ((JSONObject) o).toMap() : o)
+                .map(o -> o instanceof JSONArray ? ((JSONArray) o).toList() : o)
+                .collect(Collectors.toList())
+                .lastIndexOf(element);
     }
 
 
