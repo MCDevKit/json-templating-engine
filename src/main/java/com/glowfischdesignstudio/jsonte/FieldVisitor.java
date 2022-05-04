@@ -140,6 +140,25 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
                     }
                     return n1.intValue() + n2.intValue();
                 }
+                else if ((f1 instanceof JSONArray || f1 instanceof List) && (f2 instanceof JSONArray || f2 instanceof List)) {
+                    JSONArray a1 = f1 instanceof List ? new JSONArray((List) f1) : (JSONArray) f1;
+                    JSONArray a2 = f2 instanceof List ? new JSONArray((List) f2) : (JSONArray) f2;
+                    JSONArray a3 = new JSONArray();
+                    for (int i = 0; i < a1.length(); i++) {
+                        a3.put(a1.get(i));
+                    }
+                    for (int i = 0; i < a2.length(); i++) {
+                        a3.put(a2.get(i));
+                    }
+                    return a3;
+                }
+                else if ((f1 instanceof JSONObject || f1 instanceof Map) && (f2 instanceof JSONObject || f2 instanceof Map)) {
+                    JSONObject a1 = f1 instanceof Map ? new JSONObject((Map) f1) : (JSONObject) f1;
+                    JSONObject a2 = f2 instanceof Map ? new JSONObject((Map) f2) : (JSONObject) f2;
+                    JSONObject a3 = (JSONObject) JsonUtils.copyJson(a1);
+                    JsonUtils.merge(a3, a2);
+                    return a3;
+                }
                 else {
                     return f1.toString() + f2.toString();
                 }
