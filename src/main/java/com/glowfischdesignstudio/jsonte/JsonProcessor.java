@@ -76,7 +76,7 @@ public class JsonProcessor {
             throw new JsonTemplatingException("Module does not have a template!");
         }
         JSONObject template = root.getJSONObject("$template");
-        JSONObject scope = root.optJSONObject("$scope", new JSONObject());
+        JSONObject scope = root.has("$scope") ? root.getJSONObject("$scope") : new JSONObject();
         if (!root.has("$module")) {
             throw new JsonTemplatingException("Module does not have a name!");
         }
