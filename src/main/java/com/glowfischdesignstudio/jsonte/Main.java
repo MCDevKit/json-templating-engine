@@ -7,13 +7,14 @@ import com.glowfischdesignstudio.jsonte.utils.PipeExtensions;
 import com.glowfischdesignstudio.jsonte.utils.StringUtils;
 import com.stirante.justpipe.Pipe;
 import com.stirante.justpipe.exception.RuntimeIOException;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.PathMatcher;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -45,14 +46,24 @@ public class Main {
                         try {
                             File in = new File(args[i]);
                             if (in.exists()) {
-                                if (in.isFile()) {
-                                    JsonUtils.merge(scope, Pipe.from(in).to(PipeExtensions.JSON_OBJECT));
+                                BasicFileAttributes attributes =
+                                        Files.readAttributes(in.toPath(), BasicFileAttributes.class);
+                                if (attributes.isRegularFile()) {
+                                    try {
+                                        JsonUtils.merge(scope, Pipe.from(in).to(PipeExtensions.JSON_OBJECT));
+                                    } catch (RuntimeIOException e) {
+                                        throw new RuntimeException("Failed to read file: " + in.getAbsolutePath(), e);
+                                    }
                                 }
-                                else if (in.isDirectory()) {
+                                else if (attributes.isDirectory()) {
                                     File[] files = in.listFiles(pathname -> pathname.getName().endsWith(".json"));
                                     if (files != null) {
                                         for (File file : files) {
-                                            JsonUtils.merge(scope, Pipe.from(file).to(PipeExtensions.JSON_OBJECT));
+                                            try {
+                                                JsonUtils.merge(scope, Pipe.from(file).to(PipeExtensions.JSON_OBJECT));
+                                            } catch (RuntimeIOException e) {
+                                                throw new RuntimeException("Failed to read file: " + file.getAbsolutePath(), e);
+                                            }
                                         }
                                     }
                                 }
@@ -138,7 +149,7 @@ public class Main {
                         try {
                             JsonProcessor.processModule(Pipe.from(file).toString());
                         } catch (IOException e) {
-                            throw new JsonTemplatingException("Failed to process file " + file.getName(), e);
+                            throw new JsonTemplatingException("Failed to read file: " + file.getAbsolutePath(), e);
                         }
                     });
                     int finalIndent = indent;
@@ -165,7 +176,7 @@ public class Main {
                                         }
                                     });
                         } catch (IOException e) {
-                            throw new JsonTemplatingException("Failed to process file " + file.getName(), e);
+                            throw new JsonTemplatingException("Failed to read file: " + file.getAbsolutePath(), e);
                         }
                     });
                     if (removeSource) {
