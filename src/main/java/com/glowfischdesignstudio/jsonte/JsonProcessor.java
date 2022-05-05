@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 
 public class JsonProcessor {
 
-    private static final Pattern TEMPLATE_PATTERN = Pattern.compile("\\{\\{[^{}]+}}");
-    private static final Pattern ACTION_PATTERN = Pattern.compile("^\\{\\{[^{}]+}}$");
+    private static final Pattern TEMPLATE_PATTERN = Pattern.compile("\\{\\{(?:\\\\.|[^{}])+}}");
+    private static final Pattern ACTION_PATTERN = Pattern.compile("^\\{\\{(?:\\\\.|[^{}])+}}$");
 
     private static final String[] DANGEROUS_FUNCTIONS =
             {"fileList", "fileListRecurse", "imageWidth", "imageHeight", "getMinecraftInstallDir", "audioDuration", "isDir", "load"};

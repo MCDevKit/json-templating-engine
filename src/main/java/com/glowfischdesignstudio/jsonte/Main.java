@@ -18,9 +18,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Main {
+    private static final Pattern MCFUNCTION_PATTERN = Pattern.compile("#\\{((?:\\\\.|[^{}])+)}");
 
     public static void main(String[] args) {
         if (args.length > 0) {
@@ -62,7 +64,8 @@ public class Main {
                                             try {
                                                 JsonUtils.merge(scope, Pipe.from(file).to(PipeExtensions.JSON_OBJECT));
                                             } catch (RuntimeIOException e) {
-                                                throw new RuntimeException("Failed to read file: " + file.getAbsolutePath(), e);
+                                                throw new RuntimeException(
+                                                        "Failed to read file: " + file.getAbsolutePath(), e);
                                             }
                                         }
                                     }
@@ -161,7 +164,8 @@ public class Main {
                                     .split(pipe -> JsonProcessor.processJson(name, pipe.toString(), scope, 0)
                                             .entrySet()
                                             .stream()
-                                            .map(e -> Pipe.from(StringUtils.toString(e.getValue(), finalIndent)).with("name", e.getKey()))
+                                            .map(e -> Pipe.from(StringUtils.toString(e.getValue(), finalIndent))
+                                                    .with("name", e.getKey()))
                                             .collect(Collectors.toList()))
                                     .forEach(pipe -> {
                                         if (finalOut != null && finalOut.exists()) {
@@ -187,6 +191,20 @@ public class Main {
                             System.out.println("Failed to delete some files");
                         }
                     }
+                    files.stream().filter(file -> file.getName().endsWith(".mcfunction")).forEach(file -> {
+                        System.out.println("Templating " + file.getName());
+                        try {
+                            //TODO: Move this to a separate function
+                            String s = Pipe.from(file).toString();
+                            s = MCFUNCTION_PATTERN.matcher(s).replaceAll(m -> {
+                                String name = m.group(1);
+                                return StringUtils.toString(JsonProcessor.resolve(name, scope, file.getName()).getValue(), 0);
+                            });
+                            Pipe.from(s).to(file);
+                        } catch (IOException e) {
+                            throw new JsonTemplatingException("Failed to read file: " + file.getAbsolutePath(), e);
+                        }
+                    });
                 }
                 else {
                     throw new JsonTemplatingException("No files provided!");
@@ -207,6 +225,8 @@ public class Main {
         System.out.println("\t--out <dir> - output directory for compiled files");
         System.out.println("\t--exclude <pattern> - exclude files matching pattern");
         System.out.println("\t--include <pattern> - include files matching pattern");
+        System.out.println("\t--remove-src - remove source files after processing");
+        System.out.println("\t--minify - minify output");
         System.out.flush();
     }
 
