@@ -242,7 +242,7 @@ public class JsonProcessor {
                     }
                     else {
                         template =
-                                new JSONObject(FILE_LOADER.apply(copyPath));
+                                new JSONObject(FILE_LOADER.apply(copyPath).toString());
                     }
                 }
                 else {
