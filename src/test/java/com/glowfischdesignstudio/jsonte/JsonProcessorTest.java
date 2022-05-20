@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +34,7 @@ public class JsonProcessorTest {
                     StringWriter stringWriter = new StringWriter();
                     Pipe.from(file).to(stringWriter);
                     Map<String, Object> s = JsonProcessor.processJson(file.getName()
-                            .substring(0, file.getName().lastIndexOf('.')), stringWriter.toString(), new JSONObject(), 0);
+                            .substring(0, file.getName().lastIndexOf('.')), stringWriter.toString(), new JSONObject(), 0, new HashMap<>());
                     StringBuilder result = new StringBuilder();
                     for (String s1 : s.keySet()) {
                         result.append("File ").append(s1).append("\n");
@@ -45,7 +46,7 @@ public class JsonProcessorTest {
                     StringWriter stringWriter = new StringWriter();
                     Pipe.from(file).to(stringWriter);
                     Map<String, Object> s = JsonProcessor.processJson(file.getName()
-                            .substring(0, file.getName().lastIndexOf('.')), stringWriter.toString(), new JSONObject(), 0);
+                            .substring(0, file.getName().lastIndexOf('.')), stringWriter.toString(), new JSONObject(), 0, new HashMap<>());
                     StringBuilder result = new StringBuilder();
                     for (String s1 : s.keySet()) {
                         System.out.println("File " + s1);

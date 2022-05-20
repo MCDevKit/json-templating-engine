@@ -1,5 +1,6 @@
 package com.glowfischdesignstudio.jsonte.functions.impl;
 
+import com.glowfischdesignstudio.jsonte.JsonProcessor;
 import com.glowfischdesignstudio.jsonte.exception.JsonTemplatingException;
 import com.glowfischdesignstudio.jsonte.functions.JSONFunction;
 import com.glowfischdesignstudio.jsonte.utils.AudioUtils;
@@ -29,12 +30,8 @@ public class AudioFunctions {
      */
     @JSONFunction
     private static Double audioDuration(String path) {
-        File f = new File(path);
-        if (!f.exists()) {
-            throw new JsonTemplatingException(String.format("File '%s' not found!", path));
-        }
         try {
-            return AudioUtils.getAudioInfo(f).duration;
+            return AudioUtils.getAudioInfo(JsonProcessor.FILE_LOADER.apply(path)).duration;
         } catch (IOException e) {
             throw new JsonTemplatingException("Failed to read the file", e);
         }

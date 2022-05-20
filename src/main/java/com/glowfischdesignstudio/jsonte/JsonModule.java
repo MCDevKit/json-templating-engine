@@ -4,10 +4,12 @@ import org.json.JSONObject;
 
 public class JsonModule {
 
-    private JSONObject template;
-    private JSONObject scope;
+    private final JSONObject template;
+    private final JSONObject scope;
+    private final String name;
 
-    public JsonModule(JSONObject template, JSONObject scope) {
+    public JsonModule(String name, JSONObject template, JSONObject scope) {
+        this.name = name;
         this.template = template;
         this.scope = scope;
     }
@@ -18,5 +20,9 @@ public class JsonModule {
 
     public JSONObject getScope() {
         return scope;
+    }
+
+    public String getName() {
+        return name;
     }
 }

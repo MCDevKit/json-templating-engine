@@ -2,6 +2,7 @@ package com.glowfischdesignstudio.jsonte.functions.impl;
 
 import com.glowfischdesignstudio.jsonte.exception.JsonTemplatingException;
 import com.glowfischdesignstudio.jsonte.functions.JSONFunction;
+import com.glowfischdesignstudio.jsonte.functions.JSONUnsafe;
 import com.glowfischdesignstudio.jsonte.utils.PipeExtensions;
 import com.glowfischdesignstudio.jsonte.utils.Semver;
 import com.stirante.justpipe.Pipe;
@@ -40,6 +41,7 @@ public class MinecraftFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONUnsafe
     private static String getMinecraftInstallDir() {
         if (installDir == null) {
             try {
@@ -67,6 +69,7 @@ public class MinecraftFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONUnsafe
     private static String getLatestBPFile(String path) {
         if (bpVersions == null) {
             bpVersions = findPackVersions(true, VANILLA_BP_UUID);
@@ -87,6 +90,7 @@ public class MinecraftFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONUnsafe
     private static String getLatestRPFile(String path) {
         if (rpVersions == null) {
             rpVersions = findPackVersions(false, VANILLA_RP_UUID);
@@ -107,6 +111,7 @@ public class MinecraftFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONUnsafe
     private static JSONArray listLatestRPFiles(String path) {
         if (rpVersions == null) {
             rpVersions = findPackVersions(false, VANILLA_RP_UUID);
@@ -127,6 +132,7 @@ public class MinecraftFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONUnsafe
     private static JSONArray listLatestBPFiles(String path) {
         if (bpVersions == null) {
             bpVersions = findPackVersions(true, VANILLA_BP_UUID);

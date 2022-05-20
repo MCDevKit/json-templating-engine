@@ -1,13 +1,11 @@
 package com.glowfischdesignstudio.jsonte;
 
 import com.glowfischdesignstudio.jsonte.exception.JsonTemplatingException;
-import com.glowfischdesignstudio.jsonte.functions.FunctionDefinition;
-import com.glowfischdesignstudio.jsonte.functions.JSONFunction;
-import com.glowfischdesignstudio.jsonte.functions.JSONInstanceFunction;
-import com.glowfischdesignstudio.jsonte.functions.JSONLambda;
+import com.glowfischdesignstudio.jsonte.functions.*;
 import com.glowfischdesignstudio.jsonte.functions.impl.*;
 import com.glowfischdesignstudio.jsonte.utils.JsonUtils;
 import com.stirante.justpipe.Pipe;
+import com.stirante.justpipe.exception.RuntimeIOException;
 import org.antlr.v4.runtime.*;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,6 +16,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -27,16 +26,18 @@ public class JsonProcessor {
     private static final Pattern TEMPLATE_PATTERN = Pattern.compile("\\{\\{(?:\\\\.|[^{}])+}}");
     private static final Pattern ACTION_PATTERN = Pattern.compile("^\\{\\{(?:\\\\.|[^{}])+}}$");
 
-    private static final String[] DANGEROUS_FUNCTIONS =
-            {"fileList", "fileListRecurse", "imageWidth", "imageHeight", "getMinecraftInstallDir", "audioDuration", "isDir", "load"};
     public static final Map<String, FunctionDefinition> FUNCTIONS = new HashMap<>();
     public static final Map<Class<?>, Map<String, FunctionDefinition>> INSTANCE_FUNCTIONS = new HashMap<>();
     private static final List<Class<?>> ALLOWED_TYPES = Arrays.asList(
             String.class, Integer.class, Double.class, Float.class, Number.class, Boolean.class, Long.class, JSONArray.class, JSONObject.class, JSONLambda.class, Object.class);
 
-    private static boolean SAFE_MODE = false;
-
-    private static final Map<String, JsonModule> MODULES = new HashMap<>();
+    public static Function<String, Pipe> FILE_LOADER = path -> {
+        try {
+            return Pipe.from(new File(path));
+        } catch (IOException e) {
+            throw new RuntimeIOException(e);
+        }
+    };
 
     static {
         register(StringFunctions.class);
@@ -59,18 +60,18 @@ public class JsonProcessor {
                 .computeIfAbsent(name, FunctionDefinition::new);
     }
 
-    public static void disableFunction(String name) {
-        FUNCTIONS.get(name).disable();
-    }
-
     public static void removeDangerousFunctions() {
-        for (String f : DANGEROUS_FUNCTIONS) {
-            disableFunction(f);
+        for (FunctionDefinition func : FUNCTIONS.values()) {
+            if (func.isUnsafe()) {
+                func.disable();
+            }
         }
-        SAFE_MODE = true;
+        FILE_LOADER = path -> {
+            throw new RuntimeException("File loading is disabled");
+        };
     }
 
-    public static void processModule(String input) {
+    public static JsonModule processModule(String input) {
         JSONObject root = new JSONObject(input);
         if (!root.has("$template")) {
             throw new JsonTemplatingException("Module does not have a template!");
@@ -81,7 +82,7 @@ public class JsonProcessor {
             throw new JsonTemplatingException("Module does not have a name!");
         }
         if (template != null) {
-            MODULES.put(root.getString("$module"), new JsonModule(template, scope));
+            return new JsonModule(root.getString("$module"), template, scope);
         }
         else {
             throw new JsonTemplatingException("A module must be an object!");
@@ -98,7 +99,7 @@ public class JsonProcessor {
      * @param extra    Extra scope to use.
      * @return The extended template.
      */
-    private static JSONObject extendTemplate(Object extend, JSONObject template, boolean isCopy, JSONObject scope, Deque<Object> currentScope, JSONObject extra, long deadline) {
+    private static JSONObject extendTemplate(Object extend, JSONObject template, boolean isCopy, JSONObject scope, Deque<Object> currentScope, JSONObject extra, long deadline, Map<String, JsonModule> moduleMap) {
         List<String> modules = new ArrayList<>();
         if (extend instanceof JSONArray) {
             List<Object> list = ((JSONArray) extend).toList();
@@ -147,10 +148,10 @@ public class JsonProcessor {
             }
         }
         for (String module : modules) {
-            if (!MODULES.containsKey(module)) {
+            if (!moduleMap.containsKey(module)) {
                 throw new JsonTemplatingException(String.format("Could not find a module named '%s'!", module));
             }
-            JsonModule mod = MODULES.get(module);
+            JsonModule mod = moduleMap.get(module);
             if (mod.getTemplate() == null) {
                 throw new JsonTemplatingException(String.format("Module '%s' does not have a template!", module));
             }
@@ -176,10 +177,11 @@ public class JsonProcessor {
      * @param input       Input to process.
      * @param globalScope Global scope to use.
      * @param timeout     Timeout for the processing in milliseconds.
+     * @param modules
      * @return The map of name to processed stringified JSON.
      * @throws IOException If required files could not be read while processing.
      */
-    public static Map<String, Object> processJson(String name, String input, JSONObject globalScope, long timeout) throws IOException {
+    public static Map<String, Object> processJson(String name, String input, JSONObject globalScope, long timeout, Map<String, JsonModule> modules) throws IOException {
         // Set up the deadline
         long deadline = System.currentTimeMillis() + timeout;
         if (timeout <= 0) {
@@ -211,9 +213,6 @@ public class JsonProcessor {
         }
 
         Object template;
-        if (isCopy && SAFE_MODE) {
-            throw new JsonTemplatingException("Copy operation is disabled");
-        }
 
         // Process multiple files option
         if (root.has("$files")) {
@@ -235,7 +234,7 @@ public class JsonProcessor {
                                     name + "#/$copy").toString();
                     if (copyPath.endsWith(".templ")) {
                         Map<String, Object> map =
-                                processJson("copy", Pipe.from(new File(copyPath)).toString(), globalScope, timeout);
+                                processJson("copy", FILE_LOADER.apply(copyPath).toString(), globalScope, timeout, modules);
                         if (map.values().size() != 1) {
                             throw new JsonTemplatingException("Cannot copy a template, that produces multiple files!");
                         }
@@ -243,7 +242,7 @@ public class JsonProcessor {
                     }
                     else {
                         template =
-                                new JSONObject(Pipe.from(new File(copyPath)).toString());
+                                new JSONObject(FILE_LOADER.apply(copyPath));
                     }
                 }
                 else {
@@ -251,7 +250,7 @@ public class JsonProcessor {
                 }
                 if (isExtend) {
                     template =
-                            extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, new ArrayDeque<>(List.of(array.get(i))), extra, deadline);
+                            extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, new ArrayDeque<>(List.of(array.get(i))), extra, deadline, modules);
                 }
                 if (isCopy && hasTemplate) {
                     template = JsonUtils.merge(new JSONObject(root.getJSONObject("$template")
@@ -270,8 +269,7 @@ public class JsonProcessor {
                                 name + "#/$copy").toString();
                 if (copyPath.endsWith(".templ")) {
                     Map<String, Object> map =
-                            processJson("copy", Pipe.from(new File(String.valueOf(visitStringValue(copyPath, new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())), "$copy"))))
-                                    .toString(), globalScope, timeout);
+                            processJson("copy", FILE_LOADER.apply(String.valueOf(visitStringValue(copyPath, new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())), "$copy"))).toString(), globalScope, timeout, modules);
                     if (map.values().size() != 1) {
                         throw new JsonTemplatingException("Cannot copy a template, that produces multiple files!");
                     }
@@ -279,8 +277,7 @@ public class JsonProcessor {
                 }
                 else {
                     template =
-                            new JSONObject(Pipe.from(new File(String.valueOf(visitStringValue(copyPath, new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())), "$copy"))))
-                                    .toString());
+                            new JSONObject(FILE_LOADER.apply(String.valueOf(visitStringValue(copyPath, new JSONObject(), scope, new ArrayDeque<>(List.of(new JSONObject())), "$copy"))).toString());
                 }
             }
             else {
@@ -288,7 +285,7 @@ public class JsonProcessor {
             }
             if (isExtend && template instanceof JSONObject) {
                 template =
-                        extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, new ArrayDeque<>(List.of(new JSONObject())), new JSONObject(), deadline);
+                        extendTemplate(root.get("$extend"), (JSONObject) template, isCopy, scope, new ArrayDeque<>(List.of(new JSONObject())), new JSONObject(), deadline, modules);
             }
             else if (isExtend) {
                 throw new JsonTemplatingException("Cannot extend template that is not an object!");
@@ -650,6 +647,10 @@ public class JsonProcessor {
                                 return null;
                             }
                         }, types);
+            }
+            if (method.isAnnotationPresent(JSONUnsafe.class)) {
+                String name = method.getName();
+                FUNCTIONS.get(name).setUnsafe(true);
             }
         }
     }

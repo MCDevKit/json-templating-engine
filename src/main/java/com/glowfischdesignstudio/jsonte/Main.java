@@ -15,9 +15,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.PathMatcher;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -147,10 +145,12 @@ public class Main {
                                             exclude.stream().noneMatch(m -> m.matches(f.toPath()))))
                             .collect(Collectors.toList());
                     File finalOut = out;
+                    Map<String, JsonModule> modules = new HashMap<>();
                     files.stream().filter(file -> file.getName().endsWith(".modl")).forEach(file -> {
                         System.out.println("Processing " + file.getName());
                         try {
-                            JsonProcessor.processModule(Pipe.from(file).toString());
+                            JsonModule module = JsonProcessor.processModule(Pipe.from(file).toString());
+                            modules.put(module.getName(), module);
                         } catch (IOException e) {
                             throw new JsonTemplatingException("Failed to read file: " + file.getAbsolutePath(), e);
                         }
@@ -161,7 +161,7 @@ public class Main {
                         try {
                             String name = file.getName().substring(0, file.getName().lastIndexOf('.'));
                             Pipe.from(file)
-                                    .split(pipe -> JsonProcessor.processJson(name, pipe.toString(), scope, 0)
+                                    .split(pipe -> JsonProcessor.processJson(name, pipe.toString(), scope, 0, modules)
                                             .entrySet()
                                             .stream()
                                             .map(e -> Pipe.from(StringUtils.toString(e.getValue(), finalIndent))

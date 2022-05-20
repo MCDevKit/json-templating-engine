@@ -1,5 +1,7 @@
 package com.glowfischdesignstudio.jsonte.utils;
 
+import com.stirante.justpipe.Pipe;
+
 import java.io.*;
 
 public class AudioUtils {
@@ -12,8 +14,8 @@ public class AudioUtils {
     private static final byte[] FMT_HEADER =
             {(byte) 0x66, (byte) 0x6D, (byte) 0x74};
 
-    public static AudioInfo getAudioInfo(File f) throws IOException {
-        try (DataInputStream in = new DataInputStream(new FileInputStream(f))) {
+    public static AudioInfo getAudioInfo(Pipe f) throws IOException {
+        try (DataInputStream in = new DataInputStream(f.getInputStream())) {
             byte[] header = new byte[4];
             int read = in.read(header, 0, 4);
             if (read != 4) {

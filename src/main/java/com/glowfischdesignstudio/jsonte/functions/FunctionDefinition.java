@@ -30,6 +30,7 @@ public class FunctionDefinition {
     private final List<Class<?>[]> types = new ArrayList<>();
     private final List<Function<Object[], Object>> implementations = new ArrayList<>();
     private final String name;
+    private boolean unsafe = false;
 
     public FunctionDefinition(String name) {
         this.name = name;
@@ -144,6 +145,14 @@ public class FunctionDefinition {
     public void addImplementation(Function<Object[], Object> implementation, Class<?>... types) {
         implementations.add(implementation);
         this.types.add(types);
+    }
+
+    public boolean isUnsafe() {
+        return unsafe;
+    }
+
+    public void setUnsafe(boolean unsafe) {
+        this.unsafe = unsafe;
     }
 
     public void disable() {

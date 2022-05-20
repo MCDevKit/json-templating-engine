@@ -1,5 +1,7 @@
 package com.glowfischdesignstudio.jsonte.utils;
 
+import com.stirante.justpipe.Pipe;
+
 import java.io.*;
 import java.util.AbstractMap;
 
@@ -20,8 +22,8 @@ public class ImageUtils {
     private static final byte[] JFIF_CONSTANT =
             {(byte) 0x4A, (byte) 0x46, (byte) 0x49, (byte) 0x46, (byte) 0x00};
 
-    public static Pair<Integer, Integer> getBounds(File f) throws IOException {
-        try (DataInputStream in = new DataInputStream(new FileInputStream(f))) {
+    public static Pair<Integer, Integer> getBounds(Pipe f) throws IOException {
+        try (DataInputStream in = new DataInputStream(f.getInputStream())) {
             byte[] header = new byte[4];
             int read = in.read(header, 0, 4);
             if (read != 4) {

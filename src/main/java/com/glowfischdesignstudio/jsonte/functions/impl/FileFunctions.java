@@ -1,7 +1,9 @@
 package com.glowfischdesignstudio.jsonte.functions.impl;
 
+import com.glowfischdesignstudio.jsonte.JsonProcessor;
 import com.glowfischdesignstudio.jsonte.exception.JsonTemplatingException;
 import com.glowfischdesignstudio.jsonte.functions.JSONFunction;
+import com.glowfischdesignstudio.jsonte.functions.JSONUnsafe;
 import com.stirante.justpipe.Pipe;
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONArray;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class FileFunctions {
 
     @JSONFunction
+    @JSONUnsafe
     private static JSONArray fileList(String path) {
         File f = new File(path);
         String[] list = f.list();
@@ -45,6 +48,7 @@ public class FileFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONUnsafe
     private static JSONArray fileList(String path, String filter) {
         File f = new File(path);
         String[] list = f.list();
@@ -57,6 +61,7 @@ public class FileFunctions {
     }
 
     @JSONFunction
+    @JSONUnsafe
     private static JSONArray fileListRecurse(String path) {
         File f = new File(path);
         try {
@@ -87,6 +92,7 @@ public class FileFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONUnsafe
     private static JSONArray fileListRecurse(String path, String filter) {
         File f = new File(path);
         try {
@@ -189,6 +195,7 @@ public class FileFunctions {
      * </code>
      */
     @JSONFunction
+    @JSONUnsafe
     private static Boolean isDir(String path) {
         return new File(path).isDirectory();
     }
@@ -209,8 +216,8 @@ public class FileFunctions {
     @JSONFunction
     private static JSONObject load(String path) {
         try {
-            return new JSONObject(Pipe.from(new File(path)).toString());
-        } catch (IOException e) {
+            return new JSONObject(JsonProcessor.FILE_LOADER.apply(path).toString());
+        } catch (Exception e) {
             throw new JsonTemplatingException("An exception occurred while executing function 'load'", e);
         }
     }
