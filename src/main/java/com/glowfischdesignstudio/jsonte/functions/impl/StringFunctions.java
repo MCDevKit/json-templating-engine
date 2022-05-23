@@ -257,7 +257,7 @@ public class StringFunctions {
     @JSONFunction
     @JSONInstanceFunction
     private static Boolean endsWith(String str, String suffix) {
-        return str.startsWith(suffix);
+        return str.endsWith(suffix);
     }
 
     /**
