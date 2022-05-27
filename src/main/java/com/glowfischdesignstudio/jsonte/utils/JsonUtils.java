@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class JsonUtils {
 
@@ -96,6 +97,14 @@ public class JsonUtils {
                 template.put(s, parent.get(s));
             }
         }
+        template.keySet().stream().filter(s -> s.startsWith("$") && !s.equals("$comment")).collect(Collectors.toList()).forEach(s -> {
+            String name = s.substring(1);
+            if (template.has(name)) {
+                template.remove(name);
+            }
+            template.put(name, template.get(s));
+            template.remove(s);
+        });
         return template;
     }
 
