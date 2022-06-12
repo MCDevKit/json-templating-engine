@@ -551,7 +551,7 @@ public class JsonProcessor {
             if (resolve.getAction() == JsonAction.PREDICATE) {
                 isBoolean = true;
             }
-            if (resolve.getValue() instanceof JSONObject || resolve.getValue() instanceof JSONArray) {
+            if (resolve.getValue() instanceof JSONObject || resolve.getValue() instanceof JSONArray || resolve.getValue() instanceof Map || resolve.getValue() instanceof List) {
                 return resolve.getValue();
             }
             m.appendReplacement(sb, Matcher.quoteReplacement(String.valueOf(resolve.getValue())));
