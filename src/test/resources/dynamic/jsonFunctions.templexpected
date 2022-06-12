@@ -97,7 +97,9 @@ File jsonFunctions
       "nested.templ",
       "nested.templexpected",
       "order.templ",
-      "order.templexpected"
+      "order.templexpected",
+      "string_array_bug.templ",
+      "string_array_bug.templexpected"
     ],
     "fileListFiltered": [
       "conditionals.templ",
@@ -106,7 +108,8 @@ File jsonFunctions
       "entityComponentGroups.templ",
       "jsonFunctions.templ",
       "nested.templ",
-      "order.templ"
+      "order.templ",
+      "string_array_bug.templ"
     ]
   }
 }

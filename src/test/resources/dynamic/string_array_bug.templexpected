@@ -1,0 +1,8 @@
+File string_array_bug
+{"scenes": [{
+  "name": "test 1",
+  "inner": [
+    "item 1",
+    "item 2"
+  ]
+}]}

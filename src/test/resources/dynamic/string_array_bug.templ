@@ -1,0 +1,23 @@
+{
+  "$scope": {
+    "outer": [
+      {
+        "name": "test 1",
+        "inner": [
+          "item 1",
+          "item 2"
+        ]
+      }
+    ]
+  },
+  "$template": {
+    "scenes": [
+      {
+        "{{#outer.flatMap(x => (1..1).map(y => [x, y]))}}": {
+          "name": "{{value[0].name}}",
+          "inner": "{{value[0].inner}}"
+        }
+      }
+    ]
+  }
+}
