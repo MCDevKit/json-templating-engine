@@ -18,7 +18,7 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
     private final Deque<Object> currentScope;
     private final String path;
     private final JsonAction jsonAction;
-    private final Deque<JSONObject> scopeStack = new ArrayDeque<>();
+    private final Deque<Object> scopeStack = new ArrayDeque<>();
 
     public FieldVisitor(JSONObject extraScope, JSONObject fullScope, Deque<Object> currentScope, String path, JsonAction jsonAction) {
         this.extraScope = extraScope;
@@ -32,8 +32,12 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
         scopeStack.push(scope);
     }
 
+    private void pushScope(Map<String, Object> scope) {
+        scopeStack.push(scope);
+    }
+
     private void pushScope(String name, Object value) {
-        pushScope(new JSONObject(Map.of(name, value)));
+        pushScope(Map.of(name, value));
     }
 
     private void popScope() {
@@ -43,9 +47,12 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
     }
 
     private Object resolveScope(String name) {
-        for (JSONObject scope : scopeStack) {
-            if (scope.has(name)) {
-                return scope.get(name);
+        for (Object scope : scopeStack) {
+            if (scope instanceof JSONObject && ((JSONObject) scope).has(name)) {
+                return ((JSONObject) scope).get(name);
+            }
+            if (scope instanceof Map && ((Map<?, ?>) scope).containsKey(name)) {
+                return ((Map<?, ?>) scope).get(name);
             }
         }
         return null;
