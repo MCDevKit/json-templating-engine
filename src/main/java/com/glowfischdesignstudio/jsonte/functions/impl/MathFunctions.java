@@ -321,4 +321,23 @@ public class MathFunctions {
         return (int)Math.log10(a.intValue()) + 1;
     }
 
+    /**
+     * Returns the value of the first argument raised to the power of the second argument.
+     * @param a a: Base
+     * @param b b: Exponent
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be 16",
+     *     "test": "{{pow(4, 2)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    private static Number pow(Number a, Number b) {
+        return Math.pow(a.doubleValue(), b.doubleValue());
+    }
+
 }
