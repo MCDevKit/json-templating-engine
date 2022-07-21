@@ -140,7 +140,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be [4, 3, 2, 1, 0]",
-     *     "test": "{{reverse(0..4)}}"
+     *     "test": "{{(0..4).reverse()}}"
      *   }
      * }
      * </code>
@@ -161,7 +161,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be [1, 2, 3, 5, 8, 10]",
-     *     "test": "{{sort([2, 3, 1, 5, 8, 10])}}"
+     *     "test": "{{[2, 3, 1, 5, 8, 10].sort()}}"
      *   }
      * }
      * </code>
@@ -190,7 +190,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be true",
-     *     "test": "{{contains(['asd', '123', 123, 9], '123')}}"
+     *     "test": "{{['asd', '123', 123, 9].contains('123')}}"
      *   }
      * }
      * </code>
@@ -210,6 +210,66 @@ public class ArrayFunctions {
     }
 
     /**
+     * Returns whether any elements of the supplied array match the provided predicate.
+     * @param arr array: Array to check
+     * @param predicate predicate: Predicate to apply to elements of this stream
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be true",
+     *     "test": "{{['asd', '123', 123, 9].any(x => x == '123')}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    @JSONInstanceFunction
+    private static Boolean any(JSONArray arr, JSONLambda predicate) {
+        return arr.toList().stream().anyMatch(o -> JsonUtils.toBoolean(predicate.execute(o)));
+    }
+
+    /**
+     * Returns whether all elements of the supplied array match the provided predicate.
+     * @param arr array: Array to check
+     * @param predicate predicate: Predicate to apply to elements of this stream
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be true",
+     *     "test": "{{['asd', '123'].all(x => x.length() == 3)}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    @JSONInstanceFunction
+    private static Boolean all(JSONArray arr, JSONLambda predicate) {
+        return arr.toList().stream().allMatch(o -> JsonUtils.toBoolean(predicate.execute(o)));
+    }
+
+    /**
+     * Returns whether no elements of the supplied array match the provided predicate.
+     * @param arr array: Array to check
+     * @param predicate predicate: Predicate to apply to elements of this stream
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be true",
+     *     "test": "{{['asd', '123', 123, 9].none(x => x == '999')}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    @JSONInstanceFunction
+    private static Boolean none(JSONArray arr, JSONLambda predicate) {
+        return arr.toList().stream().noneMatch(o -> JsonUtils.toBoolean(predicate.execute(o)));
+    }
+
+    /**
      * Returns a new array that is filtered based on a predicate.
      * @param arr array: Source array
      * @param predicate predicate(element, index): Lambda, that should return whether an element should remain
@@ -218,7 +278,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be [0, 2, 4]",
-     *     "test": "{{filter(0..4, x => mod(x, 2) == 0)}}"
+     *     "test": "{{(0..4).filter(x => mod(x, 2) == 0)}}"
      *   }
      * }
      * </code>
@@ -244,7 +304,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be [0, 2, 4, 6, 8]",
-     *     "test": "{{map(0..4, x => x => x * 2)}}"
+     *     "test": "{{(0..4).map(x => x => x * 2)}}"
      *   }
      * }
      * </code>
@@ -268,7 +328,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be [1, 2, 3, 4]",
-     *     "test": "{{flatMap([[1, 2], 3, [4]])}}"
+     *     "test": "{{[[1, 2], 3, [4]].flatMap()}}"
      *   }
      * }
      * </code>
@@ -306,7 +366,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be 3",
-     *     "test": "{{count(0..4, x => mod(x, 2) == 0)}}"
+     *     "test": "{{(0..4).count(x => mod(x, 2) == 0)}}"
      *   }
      * }
      * </code>
@@ -358,7 +418,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be 0",
-     *     "test": "{{findFirst(0..4, x => mod(x, 2) == 0)}}"
+     *     "test": "{{(0..4).findFirst(x => mod(x, 2) == 0)}}"
      *   }
      * }
      * </code>
@@ -385,7 +445,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be 1",
-     *     "test": "{{indexOf(1..5, 2)}}"
+     *     "test": "{{(1..5).indexOf(2)}}"
      *   }
      * }
      * </code>
@@ -417,7 +477,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be 1",
-     *     "test": "{{lastIndexOf(1..5, 2)}}"
+     *     "test": "{{(1..5).lastIndexOf(2)}}"
      *   }
      * }
      * </code>
@@ -451,7 +511,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be -2023406815 (1000 0111 0110 0101 0100 0011 0010 0001)",
-     *     "test": "{{1..10.encode(16, x => x)}}"
+     *     "test": "{{(1..10).encode(16, x => x)}}"
      *   }
      * }
      * </code>
@@ -490,7 +550,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be [4, 5, 6, 7]",
-     *     "test": "{{0..10.sublist(4, 8)}}"
+     *     "test": "{{(0..10).sublist(4, 8)}}"
      *   }
      * }
      * </code>
@@ -528,7 +588,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be 4",
-     *     "test": "{{max(0..4)}}"
+     *     "test": "{{(0..4).max()}}"
      *   }
      * }
      * </code>
@@ -573,7 +633,7 @@ public class ArrayFunctions {
      * {
      *   "$template": {
      *     "$comment": "The field below will be 0",
-     *     "test": "{{min(0..4)}}"
+     *     "test": "{{(0..4).min()}}"
      *   }
      * }
      * </code>

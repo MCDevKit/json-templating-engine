@@ -283,7 +283,7 @@ public class StringFunctions {
 
     /**
      * Returns an array of strings, where each string is another character.
-     * @param str string: Text convert
+     * @param str string: Text to convert
      * @example
      * <code>
      * {
@@ -298,5 +298,24 @@ public class StringFunctions {
     @JSONInstanceFunction
     private static JSONArray chars(String str) {
         return new JSONArray(str.chars().mapToObj(c -> "" + (char) c).collect(Collectors.toList()));
+    }
+
+    /**
+     * Returns the length of this string.
+     * @param str string: String
+     * @example
+     * <code>
+     * {
+     *   "$template": {
+     *     "$comment": "The field below will be ['h', 'e', 'l', 'l', 'o']",
+     *     "test": "{{chars('hello')}}"
+     *   }
+     * }
+     * </code>
+     */
+    @JSONFunction
+    @JSONInstanceFunction
+    private static Integer length(String str) {
+        return str.length();
     }
 }
