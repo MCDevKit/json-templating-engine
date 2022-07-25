@@ -74,13 +74,15 @@ has_children: true
             .replace(/\s+/gm, ' ')
             .replace(/@JSONInstanceFunction /gm, '')
             .replace(/@JSONFunction /gm, '')
+            .replace(/@JSONUnsafe /gm, '')
             .replace(/\w+ \w+ \w+ (\w+)\(.*\)/gm, '$1');
         path += '/' + name + '.md';
         let sections = {
             overview: '',
             args: '',
             example: '',
-            deprecated: false
+            deprecated: false,
+            unsafe: declaration.indexOf('@JSONUnsafe') !== -1,
         };
         let lastSection = 'overview';
         doc.split('\n').forEach(value => {
@@ -105,8 +107,8 @@ title: ` + name + (sections.deprecated ? ' (deprecated)' : '') + `
 ---
 
 # ` + name + (sections.deprecated ? ' (deprecated)' : '') + `
-` + sections.overview + (sections.args.length > 0 ? '\n## Arguments\n\n' + sections.args : '') + (sections.example.length > 0 ? '\n## Example\n' + sections.example : '');
-        write(path, output.substr(0, output.length - 1));
+` + sections.overview + (sections.unsafe ? '\n**This method is marked as unsafe. It can be disabled by certain environments.**\n' : '') + (sections.args.length > 0 ? '\n## Arguments\n\n' + sections.args : '') + (sections.example.length > 0 ? '\n## Example\n' + sections.example : '');
+        write(path, output.substring(0, output.length - 1));
     }
 }
 
