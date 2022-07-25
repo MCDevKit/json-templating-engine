@@ -562,7 +562,7 @@ public class ArrayFunctions {
         if (startIndex.intValue() < 0 || startIndex.intValue() >= objects.size()) {
             throw new JsonTemplatingException("Start index " + startIndex + " is out of range 0.." + (objects.size() - 1));
         }
-        if (endIndex.intValue() < startIndex.intValue() || endIndex.intValue() >= objects.size()) {
+        if (endIndex.intValue() < startIndex.intValue() || endIndex.intValue() > objects.size()) {
             throw new JsonTemplatingException("End index " + endIndex + " is out of range startIndex.." + (objects.size() - 1));
         }
         return new JSONArray(objects.subList(startIndex.intValue(), endIndex.intValue()));
