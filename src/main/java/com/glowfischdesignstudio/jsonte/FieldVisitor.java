@@ -87,10 +87,11 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
         if (text.equals("this")) {
             return currentScope.peek();
         }
-        if (text.equals("value")) {
+        Object newScope = resolveScope(text);
+
+        if (newScope == null && text.equals("value")) {
             return currentScope.peek();
         }
-        Object newScope = resolveScope(text);
 
         Iterator<Object> it = currentScope.iterator();
         while (newScope == null && it.hasNext()) {
@@ -127,9 +128,11 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
             // Move AND and OR here to make those operators short-circuiting
             if (context.And() != null) {
                 return JsonUtils.toBoolean(visit(context.field(0))) && JsonUtils.toBoolean(visit(context.field(1)));
-            } else if (context.Or() != null) {
+            }
+            else if (context.Or() != null) {
                 return JsonUtils.toBoolean(visit(context.field(0))) || JsonUtils.toBoolean(visit(context.field(1)));
-            } else if (context.Question() != null) {
+            }
+            else if (context.Question() != null) {
                 return JsonUtils.toBoolean(visit(context.field(0))) ? visit(context.field(1)) : null;
             }
             Object f1 = visit(context.field(0));
@@ -138,8 +141,10 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
             Number n2 = JsonUtils.toNumber(f2);
             if (context.NullCoalescing() != null) {
                 return f1 == null ? f2 : f1;
-            } else if (context.Add() != null) {
-                if (((f1 instanceof Number && f2 instanceof Number) || (f1 instanceof Boolean && f2 instanceof Boolean)) && n1 != null && n2 != null) {
+            }
+            else if (context.Add() != null) {
+                if (((f1 instanceof Number && f2 instanceof Number) ||
+                        (f1 instanceof Boolean && f2 instanceof Boolean)) && n1 != null && n2 != null) {
                     boolean decimal = f1 instanceof Float || f1 instanceof Double || f2 instanceof Float ||
                             f2 instanceof Double;
                     if (decimal) {
@@ -147,7 +152,8 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
                     }
                     return n1.intValue() + n2.intValue();
                 }
-                else if ((f1 instanceof JSONArray || f1 instanceof List) && (f2 instanceof JSONArray || f2 instanceof List)) {
+                else if ((f1 instanceof JSONArray || f1 instanceof List) &&
+                        (f2 instanceof JSONArray || f2 instanceof List)) {
                     JSONArray a1 = f1 instanceof List ? new JSONArray((List) f1) : (JSONArray) f1;
                     JSONArray a2 = f2 instanceof List ? new JSONArray((List) f2) : (JSONArray) f2;
                     JSONArray a3 = new JSONArray();
@@ -159,7 +165,8 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
                     }
                     return a3;
                 }
-                else if ((f1 instanceof JSONObject || f1 instanceof Map) && (f2 instanceof JSONObject || f2 instanceof Map)) {
+                else if ((f1 instanceof JSONObject || f1 instanceof Map) &&
+                        (f2 instanceof JSONObject || f2 instanceof Map)) {
                     JSONObject a1 = f1 instanceof Map ? new JSONObject((Map) f1) : (JSONObject) f1;
                     JSONObject a2 = f2 instanceof Map ? new JSONObject((Map) f2) : (JSONObject) f2;
                     JSONObject a3 = (JSONObject) JsonUtils.copyJson(a1);
@@ -169,7 +176,8 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
                 else {
                     return f1.toString() + f2.toString();
                 }
-            } else if (context.Equal() != null) {
+            }
+            else if (context.Equal() != null) {
                 if (f1 instanceof Number && f2 instanceof Number) {
                     return ((Number) f1).doubleValue() == ((Number) f2).doubleValue();
                 }
@@ -194,7 +202,8 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
                 if (context.LessOrEqual() != null) {
                     return n1.doubleValue() <= n2.doubleValue();
                 }
-                boolean decimal = n1 instanceof Float || n1 instanceof Double || n1 instanceof BigDecimal || n2 instanceof Float ||
+                boolean decimal = n1 instanceof Float || n1 instanceof Double || n1 instanceof BigDecimal ||
+                        n2 instanceof Float ||
                         n2 instanceof Double || n2 instanceof BigDecimal;
                 if (decimal) {
                     if (context.Subtract() != null) {
@@ -226,12 +235,17 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
             else {
                 return "NaN";
             }
-        } else if (context.field().size() == 3) {
+        }
+        else if (context.field().size() == 3) {
             if (context.Question() != null) {
                 return JsonUtils.toBoolean(visit(context.field(0))) ? visit(context.field(1)) : visit(context.field(2));
             }
         }
-        if (context.LeftParen() != null && context.field().size() == 1 && context.children.indexOf(context.field(0)) == 0) {
+//        if (((Map) this.scopeStack.peek()).containsKey("value") && ((Map) this.scopeStack.peek()).get("value").equals(511)) {
+//            return "NaN";
+//        }
+        if (context.LeftParen() != null && context.field().size() == 1 &&
+                context.children.indexOf(context.field(0)) == 0) {
             Object lambda = visit(context.field(0));
             Object[] params = context.function_param().stream().map(this::visit).toArray();
             if (lambda instanceof String) {
@@ -241,7 +255,8 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
                     return ((JSONLambda) func).apply(params);
                 }
                 else {
-                    throw new JsonTemplatingException("Function '" + context.field(0).getText() + "' not found!", path);
+                    throw new JsonTemplatingException(String.format("Function '%s' not found!", context.field(0)
+                            .getText()), path);
                 }
             }
             else if (lambda instanceof BiFunction) {
@@ -255,7 +270,9 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
                 }
                 return JsonProcessor.FUNCTIONS.get(methodName).execute(params, path);
             }
-        } else if (context.LeftParen() != null && context.field().size() == 1 && context.children.indexOf(context.field(0)) != 0) {
+        }
+        else if (context.LeftParen() != null && context.field().size() == 1 &&
+                context.children.indexOf(context.field(0)) != 0) {
             return visit(context.field(0));
         }
         if (context.name() != null && context.field().size() == 1) {
@@ -271,24 +288,30 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
             }
             else {
                 if (object instanceof JSONArray || object instanceof List) {
-                    if (JsonProcessor.INSTANCE_FUNCTIONS.containsKey(JSONArray.class) && JsonProcessor.INSTANCE_FUNCTIONS.get(JSONArray.class).containsKey(text)) {
+                    if (JsonProcessor.INSTANCE_FUNCTIONS.containsKey(JSONArray.class) &&
+                            JsonProcessor.INSTANCE_FUNCTIONS.get(JSONArray.class).containsKey(text)) {
                         if (object instanceof List) {
-                            object = new JSONArray((List<?>)object);
+                            object = new JSONArray((List<?>) object);
                         }
                         Object finalObject = object;
-                        return (BiFunction<Object[], String, Object>) (params, path) -> JsonProcessor.INSTANCE_FUNCTIONS.get(JSONArray.class).get(text).execute(
-                                ArrayUtils.prepend(finalObject, params), path
-                        );
+                        return (BiFunction<Object[], String, Object>) (params, path) -> JsonProcessor.INSTANCE_FUNCTIONS.get(JSONArray.class)
+                                .get(text)
+                                .execute(
+                                        ArrayUtils.prepend(finalObject, params), path
+                                );
                     }
                     throw new JsonTemplatingException("Trying to access field from an array", path);
                 }
 
                 if (object instanceof String) {
-                    if (JsonProcessor.INSTANCE_FUNCTIONS.containsKey(String.class) && JsonProcessor.INSTANCE_FUNCTIONS.get(String.class).containsKey(text)) {
+                    if (JsonProcessor.INSTANCE_FUNCTIONS.containsKey(String.class) &&
+                            JsonProcessor.INSTANCE_FUNCTIONS.get(String.class).containsKey(text)) {
                         Object finalObject = object;
-                        return (BiFunction<Object[], String, Object>) (params, path) -> JsonProcessor.INSTANCE_FUNCTIONS.get(String.class).get(text).execute(
-                                ArrayUtils.prepend(finalObject, params), path
-                        );
+                        return (BiFunction<Object[], String, Object>) (params, path) -> JsonProcessor.INSTANCE_FUNCTIONS.get(String.class)
+                                .get(text)
+                                .execute(
+                                        ArrayUtils.prepend(finalObject, params), path
+                                );
                     }
                     throw new JsonTemplatingException("Trying to access field from a string", path);
                 }
@@ -426,8 +449,8 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
         return (JSONLambda) o -> {
             if (ctx.name().size() > o.length) {
                 throw new JsonTemplatingException(
-                        "Lambda requires " + ctx.name().size() + " parameters, but only " + o.length +
-                                " were supplied!", path);
+                        String.format("Lambda requires %d parameters, but only %d were supplied!", ctx.name()
+                                .size(), o.length), path);
             }
             for (int i = 0; i < ctx.name().size(); i++) {
                 pushScope(ctx.name(i).getText(), o[i]);
