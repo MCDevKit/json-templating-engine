@@ -241,9 +241,6 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
                 return JsonUtils.toBoolean(visit(context.field(0))) ? visit(context.field(1)) : visit(context.field(2));
             }
         }
-//        if (((Map) this.scopeStack.peek()).containsKey("value") && ((Map) this.scopeStack.peek()).get("value").equals(511)) {
-//            return "NaN";
-//        }
         if (context.LeftParen() != null && context.field().size() == 1 &&
                 context.children.indexOf(context.field(0)) == 0) {
             Object lambda = visit(context.field(0));
