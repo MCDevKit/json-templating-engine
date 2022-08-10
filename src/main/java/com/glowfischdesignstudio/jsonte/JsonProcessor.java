@@ -339,7 +339,7 @@ public class JsonProcessor {
         JsonTemplateParser parser = new JsonTemplateParser(new CommonTokenStream(lexer));
         setErrorHandlers(reference, path, lexer);
         setErrorHandlers(reference, path, parser);
-        JsonTemplateParser.ActionContext action = parser.action();
+        JsonTemplateParser.ExpressionContext action = parser.expression();
         return new ActionVisitor(extraScope, fullScope, thisInstance, path).visit(action);
     }
 

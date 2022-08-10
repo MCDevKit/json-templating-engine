@@ -18,7 +18,7 @@ public class ActionVisitor extends JsonTemplateBaseVisitor<ReferenceResult> {
     }
 
     @Override
-    public ReferenceResult visitAction(JsonTemplateParser.ActionContext ctx) {
+    public ReferenceResult visitExpression(JsonTemplateParser.ExpressionContext ctx) {
         JsonAction a = JsonAction.VALUE;
         if (ctx.Iteration() != null) {
             a = JsonAction.ITERATION;

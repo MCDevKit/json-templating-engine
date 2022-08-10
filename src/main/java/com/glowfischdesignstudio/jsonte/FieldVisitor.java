@@ -68,6 +68,17 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
     }
 
     @Override
+    public Object visitObject(JsonTemplateParser.ObjectContext ctx) {
+        JSONObject result = new JSONObject();
+        for (JsonTemplateParser.Object_fieldContext f : ctx.object_field()) {
+            String name = f.ESCAPED_STRING() != null ? StringUtils.unescape(f.ESCAPED_STRING().getText()) : f.name()
+                    .getText();
+            result.put(name, visit(f));
+        }
+        return result;
+    }
+
+    @Override
     public Object visitIndex(JsonTemplateParser.IndexContext context) {
         if (context.NUMBER() != null) {
             return parseNumber(context.NUMBER().getText());
@@ -424,6 +435,9 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
         }
         if (context.array() != null) {
             return visit(context.array());
+        }
+        if (context.object() != null) {
+            return visit(context.object());
         }
         if (context.Subtract() != null && context.field().size() == 1) {
             return negate(visit(context.field(0)));

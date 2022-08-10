@@ -57,8 +57,8 @@ public class JsonProcessorTest {
                     assertNotNull(s);
                     StringWriter out = new StringWriter();
                     Pipe.from(expected).to(out);
-                    String loaded = out.toString();
-                    assertEquals(loaded, result.toString());
+                    String loaded = out.toString().replaceAll("\r\n", "\n");
+                    assertEquals(loaded, result.toString().replaceAll("\r\n", "\n"));
                 };
                 String testName = file.getName().substring(0, file.getName().lastIndexOf('.'));
                 DynamicTest dTest = DynamicTest.dynamicTest(testName, exec);
