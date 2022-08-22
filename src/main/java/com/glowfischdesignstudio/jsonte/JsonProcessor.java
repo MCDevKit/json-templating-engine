@@ -82,7 +82,7 @@ public class JsonProcessor {
             throw new JsonTemplatingException("Module does not have a name!");
         }
         if (template != null) {
-            return new JsonModule(root.getString("$module"), template, scope);
+            return new JsonModule(root.getString("$module"), template, scope, root.has("$copy") ? root.getString("$copy") : null);
         }
         else {
             throw new JsonTemplatingException("A module must be an object!");
@@ -99,7 +99,7 @@ public class JsonProcessor {
      * @param extra    Extra scope to use.
      * @return The extended template.
      */
-    private static JSONObject extendTemplate(Object extend, JSONObject template, boolean isCopy, JSONObject scope, Deque<Object> currentScope, JSONObject extra, long deadline, Map<String, JsonModule> moduleMap) {
+    private static JSONObject extendTemplate(Object extend, JSONObject template, boolean isCopy, JSONObject scope, Deque<Object> currentScope, JSONObject extra, long deadline, Map<String, JsonModule> moduleMap) throws IOException {
         List<String> modules = new ArrayList<>();
         if (extend instanceof JSONArray) {
             List<Object> list = ((JSONArray) extend).toList();
@@ -156,9 +156,27 @@ public class JsonProcessor {
                 throw new JsonTemplatingException(String.format("Module '%s' does not have a template!", module));
             }
             JSONObject moduleScope = (JSONObject) JsonUtils.copyJson(scope);
+            JSONObject element = (JSONObject) JsonUtils.copyJson(mod.getTemplate());
+            if (mod.getCopy() != null) {
+                String copyPath = visitStringValue(mod.getCopy(), extra, scope, currentScope, "$copy").toString();
+                JSONObject copy;
+                if (copyPath.endsWith(".templ")) {
+                    Map<String, Object> map =
+                            processJson("copy", FILE_LOADER.apply(copyPath).toString(), scope, deadline - System.currentTimeMillis(), moduleMap);
+                    if (map.values().size() != 1) {
+                        throw new JsonTemplatingException("Cannot copy a template, that produces multiple files!");
+                    }
+                    copy = new JSONObject(map.get("copy"));
+                }
+                else {
+                    copy =
+                            new JSONObject(FILE_LOADER.apply(copyPath).toString());
+                }
+                element = JsonUtils.merge(copy, element);
+            }
             JsonUtils.merge(moduleScope, mod.getScope());
             JSONObject parent =
-                    (JSONObject) visit(JsonUtils.copyJson(mod.getTemplate()), extra, moduleScope, currentScope,
+                    (JSONObject) visit(element, extra, moduleScope, currentScope,
                             "[Module " + module + "]$template", deadline);
             if (isCopy) {
                 JsonUtils.merge(template, parent);
