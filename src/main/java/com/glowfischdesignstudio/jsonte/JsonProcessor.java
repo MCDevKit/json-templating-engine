@@ -172,7 +172,7 @@ public class JsonProcessor {
                     copy =
                             new JSONObject(FILE_LOADER.apply(copyPath).toString());
                 }
-                element = JsonUtils.merge(copy, element);
+                JsonUtils.merge(element, copy);
             }
             JsonUtils.merge(moduleScope, mod.getScope());
             JSONObject parent =

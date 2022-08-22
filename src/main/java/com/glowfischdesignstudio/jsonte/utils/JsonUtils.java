@@ -60,15 +60,15 @@ public class JsonUtils {
                 template.put(s.substring(1), parent.get(s));
             }
             else if (template.has(s)) {
-                if (parent.get(s) instanceof JSONObject) {
+                if (template.get(s) == JSONObject.NULL) {
+                    template.remove(s);
+                }
+                else if (parent.get(s) instanceof JSONObject) {
                     if (template.get(s) instanceof JSONArray) {
                         JSONArray arr = new JSONArray();
                         arr.put(parent.get(s));
                         parent.put(s, arr);
                         merge(template.getJSONArray(s), arr);
-                    }
-                    else if (template.get(s) == JSONObject.NULL) {
-                        template.remove(s);
                     }
                     else {
                         merge(template.getJSONObject(s), parent.getJSONObject(s));
@@ -217,15 +217,12 @@ public class JsonUtils {
     }
 
     public static Object copyJson(Object obj) {
-        Object copy = obj;
         if (obj instanceof JSONObject) {
-            JSONObject o = (JSONObject) obj;
-            copy = new JSONObject(o, o.keySet().toArray(new String[]{}));
+            return new JSONObject(obj.toString());
         }
         if (obj instanceof JSONArray) {
-            JSONArray o = (JSONArray) obj;
-            copy = new JSONArray(o.toList());
+            return new JSONArray(obj.toString());
         }
-        return copy;
+        return obj;
     }
 }
