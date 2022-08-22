@@ -133,8 +133,8 @@ public class FunctionDefinition {
     private boolean paramCheck(Object[] params, Class<?>[] types) {
         for (int i = 0; i < params.length; i++) {
             Object param = params[i];
-            if (types[i] == JSONArray.class && param instanceof List) return true;
-            if (types[i] == JSONObject.class && param instanceof Map) return true;
+            if (types[i] == JSONArray.class && param instanceof List) continue;
+            if (types[i] == JSONObject.class && param instanceof Map) continue;
             if (!types[i].isInstance(param) && param != null) {
                 return false;
             }
