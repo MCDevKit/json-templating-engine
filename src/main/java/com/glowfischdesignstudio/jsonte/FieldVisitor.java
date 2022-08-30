@@ -157,7 +157,7 @@ class FieldVisitor extends JsonTemplateBaseVisitor<Object> {
                 if (((f1 instanceof Number && f2 instanceof Number) ||
                         (f1 instanceof Boolean && f2 instanceof Boolean)) && n1 != null && n2 != null) {
                     boolean decimal = f1 instanceof Float || f1 instanceof Double || f2 instanceof Float ||
-                            f2 instanceof Double;
+                            f2 instanceof Double || f1 instanceof BigDecimal || f2 instanceof BigDecimal;
                     if (decimal) {
                         return n1.doubleValue() + n2.doubleValue();
                     }
